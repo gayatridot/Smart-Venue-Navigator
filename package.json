@@ -8,7 +8,7 @@
         "test": "jest --coverage",
         "build-js": "esbuild public/js/app.js public/js/admin-app.js --bundle --minify --format=esm --outdir=public/dist --external:https://*",
         "build-css": "cleancss -o public/dist/style.min.css public/css/style.css",
-        "build": "mkdir public/dist 2>nul || (exit 0) && npm run build-js && npm run build-css"
+        "build": "node -e \"require('fs').mkdirSync('public/dist', { recursive: true })\" && npm run build-js && npm run build-css"
     },
     "dependencies": {
         "dotenv": "^17.4.2",
