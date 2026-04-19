@@ -1,0 +1,11 @@
+node_modules/
+.env
+npm-debug.log
+.DS_Store
+.firebase/
+.firebaserc
+firebase.json
+dist/
+public/assets/*.png
+!public/assets/logo.png
+!public/assets/bg.png

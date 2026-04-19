@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Venue Navigator</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">SVN Navigator</div>
+            <div id="user-profile-btn">
+                <i class="fa-solid fa-user-circle" style="font-size: 24px; color: var(--color-primary);"></i>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content">
+            <!-- Content will be injected here by router.js -->
+        </main>
+
+        <!-- Modern Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#home" class="nav-item active" id="nav-home" data-route="home">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="#map" class="nav-item" id="nav-map" data-route="heatmap">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span>Heatmap</span>
+            </a>
+            <a href="#queue" class="nav-item" id="nav-queue" data-route="queues">
+                <i class="fa-solid fa-users-rays"></i>
+                <span>Queues</span>
+            </a>
+            <a href="#find" class="nav-item" id="nav-find" data-route="locator">
+                <i class="fa-solid fa-magnifying-glass-location"></i>
+                <span>Finder</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Generic Modal Overlay -->
+    <div id="modal-container" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div style="text-align: right; margin-bottom: 10px;">
+                <button id="close-modal" style="background:none; border:none; font-size: 20px; cursor:pointer; color: var(--text-muted);">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div id="modal-inner"></div>
+        </div>
+    </div>
+
+    <!-- Enhanced Login Overlay -->
+    <div id="auth-overlay" class="modal-overlay hidden">
+        <div class="modal-content" style="text-align: center;">
+            <div class="logo" style="font-size: 2.2rem; margin-bottom: 20px; text-align: center;">SVN</div>
+            <h2 id="auth-title">Welcome</h2>
+            <p id="auth-subtitle" style="color: var(--text-secondary); margin-bottom: 24px;">Smart Venue Companion</p>
+            
+            <div id="signup-fields" style="display:none;">
+                <div class="search-container" style="margin-bottom: 12px;">
+                    <i class="fa-solid fa-user" style="color: var(--text-muted);"></i>
+                    <input type="text" id="reg-name" placeholder="Full Name">
+                </div>
+                <div class="search-container" style="margin-bottom: 12px;">
+                    <i class="fa-solid fa-location-dot" style="color: var(--text-muted);"></i>
+                    <input type="text" id="reg-address" placeholder="Address">
+                </div>
+            </div>
+            
+            <div class="search-container" style="margin-bottom: 12px;">
+                <i class="fa-solid fa-envelope" style="color: var(--text-muted);"></i>
+                <input type="email" id="auth-email" placeholder="Email">
+            </div>
+            <div class="search-container" style="margin-bottom: 24px;">
+                <i class="fa-solid fa-lock" style="color: var(--text-muted);"></i>
+                <input type="password" id="auth-pass" placeholder="Password">
+            </div>
+            
+            <button id="btn-auth-primary" class="btn btn-primary" style="width: 100%; margin-bottom: 12px;">Sign In</button>
+            <button id="btn-toggle-auth" class="btn btn-secondary" style="width: 100%; margin-bottom: 20px; font-size: 0.85rem;">Need an account? Sign Up</button>
+
+            <div style="display:flex; align-items:center; margin-bottom:20px;">
+                <div style="flex:1; height:1px; background:var(--bg-surface-elevated);"></div>
+                <span style="padding: 0 10px; color: var(--text-muted); font-size: 11px; font-weight: 700;">OR</span>
+                <div style="flex:1; height:1px; background:var(--bg-surface-elevated);"></div>
+            </div>
+
+            <button id="btn-google" class="btn btn-secondary" style="width: 100%; gap: 12px; background: white; border: 1px solid #e2e8f0;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+                Continue with Google
+            </button>
+            <p id="auth-error" style="color: var(--color-danger); font-size: 12px; margin-top: 15px; font-weight: 600;"></p>
+        </div>
+    </div>
+
+    <!-- Assistance Request Modal -->
+    <div id="assistance-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <h3 style="color: var(--color-danger); margin:0;"><i class="fa-solid fa-life-ring"></i> Emergency Help</h3>
+                <button id="btn-close-assistance" style="background:none; border:none; font-size: 20px; cursor:pointer; color: var(--text-muted);">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Your message, location, and event details will be shared with security staff.</p>
+            <div style="margin-bottom: 15px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 5px;">SELECT ACTIVE EVENT</label>
+                <select id="assistance-event-context" class="admin-input" style="border-color: var(--color-danger-light);">
+                    <option value="">No specific event (General Help)</option>
+                </select>
+            </div>
+            <textarea id="assistance-message" class="admin-input" rows="4" placeholder="Describe your emergency or request..." style="margin-bottom: 15px; border-color: var(--color-danger-light);"></textarea>
+            <p id="assistance-status" style="font-size: 0.75rem; font-weight: 600; margin-bottom: 10px;"></p>
+            <button id="btn-submit-assistance" class="btn btn-alert" style="width: 100%;">Send Request</button>
+        </div>
+    </div>
+
+    <!-- App Scripts -->
+    <script type="module" src="/js/firebase-config.js"></script>
+    <script type="module" src="/js/mockData.js"></script>
+    <script type="module" src="/js/components.js"></script>
+    <script type="module" src="/js/router.js"></script>
+    <script type="module" src="/js/app.js"></script>
+</body>
+</html>

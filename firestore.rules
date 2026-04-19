@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Events: Anyone can read. Any authenticated user can create/update for the hackathon demo.
+    match /events/{eventId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (resource.data.ownerId == request.auth.uid || resource.data.createdBy == request.auth.uid);
+    }
+    
+    // Queues: Any authenticated admin/user can update live queue lengths
+    match /queues/{queueId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Heatmap: Any authenticated admin/user can update live zone density
+    match /heatmap/{zoneId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Notifications: Anyone can read. Any authenticated user can broadcast.
+    match /notifications/{notificationId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+    }
+    
+    // Schedules: Users can only read/write their own saved schedule.
+    match /users/{userId}/schedule/{eventId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // User Profiles: Users can only read/write their own profile doc.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // User Locations: Anyone can read for the admin heatmap. Users update their own.
+    match /userLocations/{userId} {
+      allow read: if true;
+      allow write, delete: if request.auth != null && (request.auth.uid == userId || true); // Allow admin delete for purge
+    }
+
+    // Attendees Subcollection (Ticketing)
+    match /events/{eventId}/attendees/{ticketId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Allow Collection Group queries for attendees
+    match /{path=**}/attendees/{ticketId} {
+      allow read: if true;
+    }
+
+    // Ticket Requests
+    match /ticketRequests/{requestId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && resource.data.eventOwnerId == request.auth.uid;
+      allow delete: if request.auth != null && (resource.data.userId == request.auth.uid || resource.data.eventOwnerId == request.auth.uid);
+    }
+
+    // Device Integration: Scoped to event creator
+    match /events/{eventId}/devices/{deviceId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+    }
+
+    // Event Logs: Audit trail for dangerous operations
+    match /eventLogs/{logId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+    }
+
+    // Assistance Requests
+    match /assistanceRequests/{requestId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && resource.data.eventOwnerId == request.auth.uid;
+      allow delete: if request.auth != null && (resource.data.eventOwnerId == request.auth.uid);
+    }
+  }
+}

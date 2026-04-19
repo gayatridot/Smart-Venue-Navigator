@@ -1,0 +1,15 @@
+{
+  "name": "smart-venue-navigator",
+  "version": "1.0.0",
+  "description": "Smart Venue Navigator MVP for Hackathon",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "firebase": "^12.12.0",
+    "nodemailer": "^8.0.5"
+  }
+}
