@@ -4,7 +4,7 @@ npm-debug.log
 .DS_Store
 .firebase/
 .firebaserc
-firebase.json
+# firebase.json removed from ignore for index deployment support
 public/dist/
 coverage/
 .gemini/
