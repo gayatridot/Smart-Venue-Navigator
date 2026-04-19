@@ -1,755 +1,1098 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | SVN</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-    <link rel="stylesheet" href="/css/style.css">
-    <style>
-        body { overflow-y: auto !important; background: var(--bg-base); }
-        .admin-nav {
-            display: flex;
-            background: white;
-            padding: 10px 20px;
-            gap: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow-soft);
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .admin-nav::-webkit-scrollbar { display: none; }
-        .nav-tab {
-            padding: 10px 16px;
-            font-weight: 700;
-            color: var(--text-muted);
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-            border-radius: var(--border-radius-md);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .nav-tab i { font-size: 1.1rem; }
-        .nav-tab.active {
-            color: var(--color-primary);
-            background: var(--bg-surface-elevated);
-        }
-        .tab-content { display: none; padding: 24px; animation: fadeIn 0.3s ease; }
-        .tab-content.active { display: block; }
-        
-        .admin-card {
-            background: white;
-            border-radius: var(--border-radius-lg);
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid rgba(0,0,0,0.03);
-        }
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); }
-        .admin-input {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: var(--border-radius-md);
-            border: 1px solid #E2E8F0;
-            outline: none;
-            transition: border-color 0.2s;
-            font-family: inherit;
-        }
-        .admin-input:focus { border-color: var(--color-primary); }
-        
-        .event-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            background: var(--bg-surface-elevated);
-            border-radius: var(--border-radius-md);
-            margin-bottom: 12px;
-            border-left: 4px solid var(--color-primary);
-        }
-    </style>
-</head>
-<body>
-    <!-- Admin Protection Block -->
-    <div id="admin-auth" class="modal-overlay">
-        <div class="modal-content" style="text-align: center; max-width: 360px;">
-            <div class="logo" style="font-size: 2.5rem; margin-bottom: 16px; text-align: center;">SVN</div>
-            <h2>Member Access</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 24px;">Manage your venue events.</p>
-            
-            <div class="search-container" style="margin-bottom: 12px;">
-                <i class="fa-solid fa-envelope" style="color: var(--text-muted);"></i>
-                <input type="email" id="admin-email" placeholder="Email Address">
-            </div>
-            <div class="search-container" style="margin-bottom: 24px;">
-                <i class="fa-solid fa-lock" style="color: var(--text-muted);"></i>
-                <input type="password" id="admin-pass" placeholder="Password">
-            </div>
-            
-            <button id="btn-admin-login" class="btn btn-primary" style="width: 100%;">Sign In</button>
-            <p id="admin-err" style="color: var(--color-danger); font-size: 12px; margin-top: 15px; font-weight: 600;"></p>
-        </div>
-    </div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Dashboard | SVN</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        />
+        <link rel="stylesheet" href="/css/style.css" />
+        <style>
+            body {
+                overflow-y: auto !important;
+                background: var(--bg-base);
+            }
+            .admin-nav {
+                display: flex;
+                background: white;
+                padding: 10px 20px;
+                gap: 20px;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                box-shadow: var(--shadow-soft);
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+            .admin-nav::-webkit-scrollbar {
+                display: none;
+            }
+            .nav-tab {
+                padding: 10px 16px;
+                font-weight: 700;
+                color: var(--text-muted);
+                cursor: pointer;
+                white-space: nowrap;
+                transition: all 0.2s ease;
+                border-radius: var(--border-radius-md);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .nav-tab i {
+                font-size: 1.1rem;
+            }
+            .nav-tab.active {
+                color: var(--color-primary);
+                background: var(--bg-surface-elevated);
+            }
+            .tab-content {
+                display: none;
+                padding: 24px;
+                animation: fadeIn 0.3s ease;
+            }
+            .tab-content.active {
+                display: block;
+            }
 
-    <div class="hidden" id="admin-dashboard">
-        <header class="app-header">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <div class="logo">SVN Management</div>
-                <button id="btn-delete-all-events" class="btn btn-alert" style="background: transparent; border: 1px solid var(--color-danger); color: var(--color-danger); padding: 6px 12px; font-size: 0.7rem; border-radius: var(--border-radius-pill);">
-                    <i class="fa-solid fa-trash-can"></i> Delete My Events
+            .admin-card {
+                background: white;
+                border-radius: var(--border-radius-lg);
+                padding: 24px;
+                margin-bottom: 24px;
+                box-shadow: var(--shadow-md);
+                border: 1px solid rgba(0, 0, 0, 0.03);
+            }
+            .input-group {
+                margin-bottom: 20px;
+            }
+            .input-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 700;
+                font-size: 0.85rem;
+                color: var(--text-secondary);
+            }
+            .admin-input {
+                width: 100%;
+                padding: 12px 16px;
+                border-radius: var(--border-radius-md);
+                border: 1px solid #e2e8f0;
+                outline: none;
+                transition: border-color 0.2s;
+                font-family: inherit;
+            }
+            .admin-input:focus {
+                border-color: var(--color-primary);
+            }
+
+            .event-list-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 16px;
+                background: var(--bg-surface-elevated);
+                border-radius: var(--border-radius-md);
+                margin-bottom: 12px;
+                border-left: 4px solid var(--color-primary);
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Admin Protection Block -->
+        <div id="admin-auth" class="modal-overlay">
+            <div class="modal-content" style="text-align: center; max-width: 360px">
+                <div
+                    class="logo"
+                    style="font-size: 2.5rem; margin-bottom: 16px; text-align: center"
+                >
+                    SVN
+                </div>
+                <h2>Member Access</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 24px">
+                    Manage your venue events.
+                </p>
+
+                <div class="search-container" style="margin-bottom: 12px">
+                    <i class="fa-solid fa-envelope" style="color: var(--text-muted)"></i>
+                    <input
+                        type="email"
+                        id="admin-email"
+                        placeholder="Email Address"
+                        aria-label="Email Address"
+                    />
+                </div>
+                <div class="search-container" style="margin-bottom: 24px">
+                    <i class="fa-solid fa-lock" style="color: var(--text-muted)"></i>
+                    <input
+                        type="password"
+                        id="admin-pass"
+                        placeholder="Password"
+                        aria-label="Password"
+                    />
+                </div>
+
+                <button id="btn-admin-login" class="btn btn-primary" style="width: 100%">
+                    Sign In
                 </button>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div id="admin-profile-display" style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">
-                    <i class="fa-solid fa-user-shield" style="font-size: 1.2rem; color: var(--color-primary);"></i>
-                    <span id="admin-display-name">Admin</span>
-                </div>
-                <a href="/" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.8rem; border-radius: var(--border-radius-pill); text-decoration: none;">
-                    <i class="fa-solid fa-arrow-left"></i> App View
-                </a>
-            </div>
-        </header>
-
-        <nav class="admin-nav">
-            <div class="nav-tab active" data-tab="tab-events"><i class="fa-solid fa-calendar-plus"></i> Events</div>
-            <div class="nav-tab" data-tab="tab-requests"><i class="fa-solid fa-ticket"></i> Requests</div>
-            <div class="nav-tab" data-tab="tab-live"><i class="fa-solid fa-bolt"></i> Live Stats</div>
-            <div class="nav-tab" data-tab="tab-emergency"><i class="fa-solid fa-bullhorn"></i> Safety</div>
-            <div class="nav-tab" data-tab="tab-devices"><i class="fa-solid fa-microchip"></i> Devices</div>
-        </nav>
-
-        <!-- Events Tab -->
-        <div id="tab-events" class="tab-content active">
-            <div class="admin-card">
-                <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-pen-to-square"></i> Event Configuration</h3>
-                <div class="input-group">
-                    <label>Title</label>
-                    <input type="text" id="ev-name" class="admin-input" placeholder="e.g. Finals 2024">
-                </div>
-                <div class="input-group">
-                    <label>Event Date</label>
-                    <input type="date" id="ev-date" class="admin-input">
-                </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-                    <div class="input-group">
-                        <label>Start Time</label>
-                        <input type="time" id="ev-time-start" class="admin-input">
-                    </div>
-                    <div class="input-group">
-                        <label>End Time</label>
-                        <input type="time" id="ev-time-end" class="admin-input">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>Venue / Gate</label>
-                    <input type="text" id="ev-loc" class="admin-input" placeholder="e.g. Gate A, North Stand">
-                </div>
-                <div class="input-group">
-                    <label>Description</label>
-                    <textarea id="ev-desc" rows="2" class="admin-input" style="resize: none;"></textarea>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                    <div class="input-group">
-                        <label>Total Capacity</label>
-                        <input type="number" id="ev-total" class="admin-input" placeholder="100">
-                    </div>
-                    <div class="input-group">
-                        <label>Batches</label>
-                        <input type="number" id="ev-batches" class="admin-input" placeholder="5">
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-                    <label class="flex-row" style="cursor: pointer; background: var(--bg-surface-elevated); padding: 12px; border-radius: 12px;">
-                        <span style="font-size: 0.85rem; font-weight: 600;">Multiple Tickets</span>
-                        <input type="checkbox" id="ev-allow-multi">
-                    </label>
-                    <label class="flex-row" style="cursor: pointer; background: var(--bg-surface-elevated); padding: 12px; border-radius: 12px;">
-                        <span style="font-size: 0.85rem; font-weight: 600;">Collect Fees</span>
-                        <input type="checkbox" id="ev-charge-fees">
-                    </label>
-                </div>
-
-                <div id="fee-config" class="hidden">
-                    <div class="input-group">
-                        <label>Fee Details</label>
-                        <input type="text" id="ev-fee-note" class="admin-input" placeholder="e.g. $15 Entry Fee">
-                    </div>
-                </div>
-
-                <button id="btn-save-event" class="btn btn-primary" style="width: 100%;">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Push Event Update
-                </button>
-            </div>
-
-            <h3 style="margin-bottom: 16px;">Active Events</h3>
-            <div id="admin-events-list">
-                <p class="subtext">Loading existing events...</p>
+                <p
+                    id="admin-err"
+                    style="
+                        color: var(--color-danger);
+                        font-size: 12px;
+                        margin-top: 15px;
+                        font-weight: 600;
+                    "
+                ></p>
             </div>
         </div>
 
-        <!-- Requests Tab -->
-        <div id="tab-requests" class="tab-content">
-            <div class="admin-card">
-                <h3 style="margin-bottom: 16px;">Ticketing Operations</h3>
-                <div class="search-container" style="margin-bottom: 20px;">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="admin-req-search" placeholder="Search by name or email...">
+        <div class="hidden" id="admin-dashboard">
+            <header class="app-header">
+                <div style="display: flex; align-items: center; gap: 15px">
+                    <div class="logo">SVN Management</div>
+                    <button
+                        id="btn-delete-all-events"
+                        aria-label="Delete All My Events"
+                        class="btn btn-alert"
+                        style="
+                            background: transparent;
+                            border: 1px solid var(--color-danger);
+                            color: var(--color-danger);
+                            padding: 6px 12px;
+                            font-size: 0.7rem;
+                            border-radius: var(--border-radius-pill);
+                        "
+                    >
+                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i> Delete My Events
+                    </button>
                 </div>
-                <div id="ticket-requests-list" style="max-height: 500px; overflow-y: auto;">
-                    <p class="subtext">Awaiting requests...</p>
-                </div>
-            </div>
-
-            <div class="admin-card">
-                <h3 style="margin-bottom: 16px;">Direct Issuance</h3>
-                <div class="input-group">
-                    <label>Select Event</label>
-                    <select id="issue-ev-id" class="admin-input"></select>
-                </div>
-                <div class="input-group">
-                    <label>Attendee Email</label>
-                    <input type="email" id="issue-email" class="admin-input">
-                </div>
-                <button id="btn-issue-tkt" class="btn btn-primary" style="width: 100%;">Issue Official Ticket</button>
-                <p id="issue-status" style="margin-top: 10px; font-size: 0.75rem; font-weight: 600;"></p>
-            </div>
-        </div>
-
-        <!-- Live Stats Tab -->
-        <div id="tab-live" class="tab-content">
-            <div class="admin-card" style="background: var(--bg-surface-elevated); border-left: 4px solid var(--color-primary);">
-                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--color-primary); margin-bottom: 8px;">ACTIVE EVENT CONTEXT</label>
-                <select id="stats-ev-context" class="admin-input" style="font-weight: 700;">
-                    <option value="">Select Event to Monitor...</option>
-                </select>
-                <p class="subtext" style="margin-top: 8px; font-size: 0.7rem;">Live queues and heatmaps will be associated with this event's operational period.</p>
-            </div>
-
-            <div class="admin-card">
-                <h3 style="margin-bottom: 16px;">Queue Control</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                    <input type="text" id="q-id" class="admin-input" placeholder="ID (e.g. q1)">
-                    <input type="text" id="q-type" class="admin-input" placeholder="Type (Restroom)">
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                    <input type="text" id="q-sec" class="admin-input" placeholder="Section">
-                    <input type="number" id="q-wait" class="admin-input" placeholder="Wait (min)">
-                </div>
-                <select id="q-status" class="admin-input" style="margin-bottom: 16px;">
-                    <option value="Fast">Fast</option>
-                    <option value="Moderate">Moderate</option>
-                    <option value="Busy">Busy</option>
-                </select>
-                <button id="btn-save-q" class="btn btn-primary" style="width: 100%;">Sync Queue Data</button>
-            </div>
-
-            <div class="admin-card">
-                <h3 style="margin-bottom: 16px;">Occupancy Heatmap</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                    <input type="text" id="h-id" class="admin-input" placeholder="Zone ID">
-                    <input type="text" id="h-name" class="admin-input" placeholder="Zone Name">
-                </div>
-                <select id="h-status" class="admin-input" style="margin-bottom: 16px;">
-                    <option value="fast">Low Density</option>
-                    <option value="moderate">Medium Density</option>
-                    <option value="busy">High Density</option>
-                </select>
-                <button id="btn-save-h" class="btn btn-primary" style="width: 100%;">Update Density</button>
-            </div>
-
-            <div class="admin-card">
-                <h3 style="margin-bottom: 16px;">Live Crowd Overview</h3>
-                <div id="admin-heatmap-list">
-                    <p class="subtext">Awaiting density sync...</p>
-                </div>
-            </div>
-
-            <div class="admin-card">
-                <h3 style="margin-bottom: 16px;">Live Fleet Map</h3>
-                <div id="admin-user-locations" style="max-height: 300px; overflow-y: auto;">
-                    <p class="subtext">No active connections...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Emergency Tab -->
-        <div id="tab-emergency" class="tab-content">
-            <div class="admin-card" style="border: 2px solid var(--color-danger); background: #FFF5F5; margin-bottom: 24px;">
-                <h2 style="color: var(--color-danger); margin-bottom: 16px;"><i class="fa-solid fa-triangle-exclamation"></i> Emergency Response</h2>
-                <p style="margin-bottom: 24px; color: #991B1B; font-weight: 600;">Warning: This will broadcast an un-ignorable emergency alert to ALL connected user devices instantly.</p>
-                
-                <button id="btn-emergency" class="btn btn-alert" style="width: 100%; height: 80px; font-size: 1.1rem; margin-bottom: 24px;">
-                    ACTIVATE EMERGENCY OVERRIDE
-                </button>
-
-                <div style="border-top: 1px solid rgba(0,0,0,0.1); padding-top: 24px; text-align: center;">
-                    <p style="font-size: 0.75rem; color: var(--text-muted);">Dangerous Operations are now managed from the dashboard header.</p>
-                </div>
-            </div>
-
-            <div class="admin-card">
-                <h3 style="margin-bottom: 16px; color: var(--color-danger);"><i class="fa-solid fa-life-ring"></i> Assistance Requests</h3>
-                <div id="assistance-requests-list" style="max-height: 500px; overflow-y: auto;">
-                    <p class="subtext">Awaiting calls for support...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Devices Tab -->
-        <div id="tab-devices" class="tab-content">
-            <div class="admin-card">
-                <h3 style="margin-bottom: 16px;"><i class="fa-solid fa-microchip"></i> Device Integration</h3>
-                <p class="subtext" style="margin-bottom: 24px;">Connect CCTV, Wi-Fi APs, and IoT sensors to your event zones.</p>
-                
-                <div style="background: var(--bg-surface-elevated); padding: 20px; border-radius: 12px; margin-bottom: 24px;">
-                    <div class="input-group">
-                        <label>Select Event Context</label>
-                        <select id="dev-ev-id" class="admin-input"></select>
+                <div style="display: flex; align-items: center; gap: 12px">
+                    <div
+                        id="admin-profile-display"
+                        style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            font-size: 0.8rem;
+                            font-weight: 600;
+                            color: var(--text-secondary);
+                        "
+                    >
+                        <i
+                            class="fa-solid fa-user-shield"
+                            style="font-size: 1.2rem; color: var(--color-primary)"
+                        ></i>
+                        <span id="admin-display-name">Admin</span>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <a
+                        href="/"
+                        class="btn btn-secondary"
+                        style="
+                            padding: 8px 16px;
+                            font-size: 0.8rem;
+                            border-radius: var(--border-radius-pill);
+                            text-decoration: none;
+                        "
+                    >
+                        <i class="fa-solid fa-arrow-left"></i> App View
+                    </a>
+                </div>
+            </header>
+
+            <nav class="admin-nav">
+                <div class="nav-tab active" data-tab="tab-events">
+                    <i class="fa-solid fa-calendar-plus"></i> Events
+                </div>
+                <div class="nav-tab" data-tab="tab-requests">
+                    <i class="fa-solid fa-ticket"></i> Requests
+                </div>
+                <div class="nav-tab" data-tab="tab-live">
+                    <i class="fa-solid fa-bolt"></i> Live Stats
+                </div>
+                <div class="nav-tab" data-tab="tab-emergency">
+                    <i class="fa-solid fa-bullhorn"></i> Safety
+                </div>
+                <div class="nav-tab" data-tab="tab-devices">
+                    <i class="fa-solid fa-microchip"></i> Devices
+                </div>
+            </nav>
+
+            <!-- Events Tab -->
+            <div id="tab-events" class="tab-content active">
+                <div class="admin-card">
+                    <h3 style="margin-bottom: 20px">
+                        <i class="fa-solid fa-pen-to-square"></i> Event Configuration
+                    </h3>
+                    <div class="input-group">
+                        <label>Title</label>
+                        <input
+                            type="text"
+                            id="ev-name"
+                            class="admin-input"
+                            placeholder="e.g. Finals 2024"
+                            aria-label="e.g. Finals 2024"
+                        />
+                    </div>
+                    <div class="input-group">
+                        <label>Event Date</label>
+                        <input type="date" id="ev-date" class="admin-input" aria-label="ev date" />
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
                         <div class="input-group">
-                            <label>Device Type</label>
-                            <select id="dev-type" class="admin-input">
-                                <option value="CCTV">CCTV Camera</option>
-                                <option value="WiFi">Wi-Fi Access Point</option>
-                                <option value="IoT">IoT Sensor</option>
-                            </select>
+                            <label>Start Time</label>
+                            <input
+                                type="time"
+                                id="ev-time-start"
+                                class="admin-input"
+                                aria-label="ev time start"
+                            />
                         </div>
                         <div class="input-group">
-                            <label>Zone Location</label>
-                            <input type="text" id="dev-zone" class="admin-input" placeholder="e.g. Main Entrance">
+                            <label>End Time</label>
+                            <input
+                                type="time"
+                                id="ev-time-end"
+                                class="admin-input"
+                                aria-label="ev time end"
+                            />
                         </div>
                     </div>
                     <div class="input-group">
-                        <label>Device Name</label>
-                        <input type="text" id="dev-name" class="admin-input" placeholder="e.g. Cam_Gate_01">
+                        <label>Venue / Gate</label>
+                        <input
+                            type="text"
+                            id="ev-loc"
+                            class="admin-input"
+                            placeholder="e.g. Gate A, North Stand"
+                            aria-label="e.g. Gate A, North Stand"
+                        />
                     </div>
                     <div class="input-group">
-                        <label id="dev-config-label">Stream URL / API Endpoint</label>
-                        <input type="text" id="dev-config" class="admin-input" placeholder="rtsp://... or https://api...">
+                        <label>Description</label>
+                        <textarea
+                            id="ev-desc"
+                            rows="2"
+                            class="admin-input"
+                            style="resize: none"
+                            aria-label="ev desc"
+                        ></textarea>
                     </div>
-                    <button id="btn-save-device" class="btn btn-primary" style="width: 100%;">
-                        <i class="fa-solid fa-plus-circle"></i> Register Device
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+                        <div class="input-group">
+                            <label>Total Capacity</label>
+                            <input
+                                type="number"
+                                id="ev-total"
+                                class="admin-input"
+                                placeholder="100"
+                                aria-label="100"
+                            />
+                        </div>
+                        <div class="input-group">
+                            <label>Batches</label>
+                            <input
+                                type="number"
+                                id="ev-batches"
+                                class="admin-input"
+                                placeholder="5"
+                                aria-label="5"
+                            />
+                        </div>
+                    </div>
+
+                    <div
+                        style="
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 16px;
+                            margin-bottom: 20px;
+                        "
+                    >
+                        <label
+                            class="flex-row"
+                            style="
+                                cursor: pointer;
+                                background: var(--bg-surface-elevated);
+                                padding: 12px;
+                                border-radius: 12px;
+                            "
+                        >
+                            <span style="font-size: 0.85rem; font-weight: 600"
+                                >Multiple Tickets</span
+                            >
+                            <input
+                                type="checkbox"
+                                id="ev-allow-multi"
+                                aria-label="ev allow multi"
+                            />
+                        </label>
+                        <label
+                            class="flex-row"
+                            style="
+                                cursor: pointer;
+                                background: var(--bg-surface-elevated);
+                                padding: 12px;
+                                border-radius: 12px;
+                            "
+                        >
+                            <span style="font-size: 0.85rem; font-weight: 600">Collect Fees</span>
+                            <input
+                                type="checkbox"
+                                id="ev-charge-fees"
+                                aria-label="ev charge fees"
+                            />
+                        </label>
+                    </div>
+
+                    <div id="fee-config" class="hidden">
+                        <div class="input-group">
+                            <label>Fee Details</label>
+                            <input
+                                type="text"
+                                id="ev-fee-note"
+                                class="admin-input"
+                                placeholder="e.g. $15 Entry Fee"
+                                aria-label="e.g. $15 Entry Fee"
+                            />
+                        </div>
+                    </div>
+
+                    <button id="btn-save-event" class="btn btn-primary" style="width: 100%">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Push Event Update
                     </button>
                 </div>
 
-                <div id="admin-devices-list">
-                    <p class="subtext">No devices registered for this event.</p>
+                <h3 style="margin-bottom: 16px">Active Events</h3>
+                <div id="admin-events-list">
+                    <p class="subtext">Loading existing events...</p>
+                </div>
+            </div>
+
+            <!-- Requests Tab -->
+            <div id="tab-requests" class="tab-content">
+                <div class="admin-card">
+                    <h3 style="margin-bottom: 16px">Ticketing Operations</h3>
+                    <div class="search-container" style="margin-bottom: 20px">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input
+                            type="text"
+                            id="admin-req-search"
+                            placeholder="Search by name or email..."
+                            aria-label="Search by name or email..."
+                        />
+                    </div>
+                    <div id="ticket-requests-list" style="max-height: 500px; overflow-y: auto">
+                        <p class="subtext">Awaiting requests...</p>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <h3 style="margin-bottom: 16px">Direct Issuance</h3>
+                    <div class="input-group">
+                        <label>Select Event</label>
+                        <select
+                            id="issue-ev-id"
+                            class="admin-input"
+                            aria-label="issue ev id"
+                        ></select>
+                    </div>
+                    <div class="input-group">
+                        <label>Attendee Email</label>
+                        <input
+                            type="email"
+                            id="issue-email"
+                            class="admin-input"
+                            aria-label="issue email"
+                        />
+                    </div>
+                    <button id="btn-issue-tkt" class="btn btn-primary" style="width: 100%">
+                        Issue Official Ticket
+                    </button>
+                    <p
+                        id="issue-status"
+                        style="margin-top: 10px; font-size: 0.75rem; font-weight: 600"
+                    ></p>
+                </div>
+
+                <!-- ===== TICKET ANALYTICS PANEL ===== -->
+                <div class="admin-card" id="ticket-analytics-panel" style="display: none">
+                    <div
+                        style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            margin-bottom: 20px;
+                        "
+                    >
+                        <div>
+                            <h3 style="margin: 0">
+                                <i
+                                    class="fa-solid fa-chart-pie"
+                                    style="color: var(--color-primary); margin-right: 8px"
+                                ></i
+                                >Ticket Analytics
+                            </h3>
+                            <p
+                                style="
+                                    font-size: 0.75rem;
+                                    color: var(--text-muted);
+                                    margin-top: 4px;
+                                "
+                                id="analytics-event-label"
+                            >
+                                Select an event above to view live stats
+                            </p>
+                        </div>
+                        <span
+                            id="analytics-live-badge"
+                            style="
+                                background: #dcfce7;
+                                color: #166534;
+                                font-size: 0.6rem;
+                                font-weight: 800;
+                                padding: 4px 10px;
+                                border-radius: 20px;
+                                display: flex;
+                                align-items: center;
+                                gap: 5px;
+                            "
+                        >
+                            <span
+                                style="
+                                    width: 6px;
+                                    height: 6px;
+                                    background: #22c55e;
+                                    border-radius: 50%;
+                                    display: inline-block;
+                                "
+                            ></span
+                            >LIVE
+                        </span>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div
+                        style="
+                            display: grid;
+                            grid-template-columns: 1fr 1fr 1fr;
+                            gap: 12px;
+                            margin-bottom: 24px;
+                        "
+                    >
+                        <div
+                            style="
+                                background: linear-gradient(135deg, #eff6ff, #dbeafe);
+                                border-radius: 12px;
+                                padding: 16px;
+                                text-align: center;
+                            "
+                        >
+                            <div
+                                style="
+                                    font-size: 1.8rem;
+                                    font-weight: 900;
+                                    color: var(--color-primary);
+                                "
+                                id="stat-total"
+                            >
+                                —
+                            </div>
+                            <div
+                                style="
+                                    font-size: 0.65rem;
+                                    font-weight: 700;
+                                    color: var(--text-secondary);
+                                    margin-top: 4px;
+                                "
+                            >
+                                TOTAL SEATS
+                            </div>
+                        </div>
+                        <div
+                            style="
+                                background: linear-gradient(135deg, #fff7ed, #fed7aa);
+                                border-radius: 12px;
+                                padding: 16px;
+                                text-align: center;
+                            "
+                        >
+                            <div
+                                style="font-size: 1.8rem; font-weight: 900; color: #c2410c"
+                                id="stat-issued"
+                            >
+                                —
+                            </div>
+                            <div
+                                style="
+                                    font-size: 0.65rem;
+                                    font-weight: 700;
+                                    color: var(--text-secondary);
+                                    margin-top: 4px;
+                                "
+                            >
+                                ISSUED
+                            </div>
+                        </div>
+                        <div
+                            style="
+                                background: linear-gradient(135deg, #f0fdf4, #bbffd8);
+                                border-radius: 12px;
+                                padding: 16px;
+                                text-align: center;
+                            "
+                        >
+                            <div
+                                style="font-size: 1.8rem; font-weight: 900; color: #15803d"
+                                id="stat-available"
+                            >
+                                —
+                            </div>
+                            <div
+                                style="
+                                    font-size: 0.65rem;
+                                    font-weight: 700;
+                                    color: var(--text-secondary);
+                                    margin-top: 4px;
+                                "
+                            >
+                                AVAILABLE
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Occupancy Progress Bar -->
+                    <div style="margin-bottom: 24px">
+                        <div
+                            style="
+                                display: flex;
+                                justify-content: space-between;
+                                font-size: 0.7rem;
+                                font-weight: 700;
+                                color: var(--text-secondary);
+                                margin-bottom: 6px;
+                            "
+                        >
+                            <span>OCCUPANCY</span>
+                            <span id="stat-pct">0%</span>
+                        </div>
+                        <div
+                            style="
+                                height: 10px;
+                                background: #f1f5f9;
+                                border-radius: 10px;
+                                overflow: hidden;
+                            "
+                        >
+                            <div
+                                id="stat-bar"
+                                style="
+                                    height: 100%;
+                                    width: 0%;
+                                    border-radius: 10px;
+                                    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+                                    transition: width 0.8s ease;
+                                "
+                            ></div>
+                        </div>
+                    </div>
+
+                    <!-- Add More Tickets (shown only when sold out) -->
+                    <div
+                        id="add-tickets-section"
+                        style="
+                            display: none;
+                            background: #fef2f2;
+                            border: 1px solid #fecaca;
+                            border-radius: 12px;
+                            padding: 16px;
+                            margin-bottom: 24px;
+                        "
+                    >
+                        <h4 style="color: #991b1b; margin-bottom: 10px">
+                            <i class="fa-solid fa-circle-exclamation" style="margin-right: 6px"></i
+                            >Sold Out — Add More Seats
+                        </h4>
+                        <div style="display: flex; gap: 10px; align-items: center">
+                            <input
+                                type="number"
+                                id="add-tickets-count"
+                                class="admin-input"
+                                placeholder="How many?"
+                                value="10"
+                                style="max-width: 120px; margin: 0"
+                                aria-label="How many?"
+                            />
+                            <button id="btn-add-tickets" class="btn btn-primary" style="flex: 1">
+                                <i class="fa-solid fa-plus"></i> Add Tickets
+                            </button>
+                        </div>
+                        <p
+                            id="add-tickets-status"
+                            style="margin-top: 8px; font-size: 0.75rem; font-weight: 600"
+                        ></p>
+                    </div>
+
+                    <!-- Seat Grid -->
+                    <div style="margin-bottom: 24px">
+                        <div
+                            style="
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                margin-bottom: 12px;
+                            "
+                        >
+                            <h4 style="margin: 0">
+                                <i
+                                    class="fa-solid fa-th"
+                                    style="color: var(--color-primary); margin-right: 6px"
+                                ></i
+                                >Seat Map
+                            </h4>
+                            <div
+                                style="
+                                    display: flex;
+                                    gap: 12px;
+                                    font-size: 0.65rem;
+                                    font-weight: 700;
+                                "
+                            >
+                                <span
+                                    ><span
+                                        style="
+                                            display: inline-block;
+                                            width: 10px;
+                                            height: 10px;
+                                            background: #22c55e;
+                                            border-radius: 3px;
+                                            margin-right: 4px;
+                                        "
+                                    ></span
+                                    >Available</span
+                                >
+                                <span
+                                    ><span
+                                        style="
+                                            display: inline-block;
+                                            width: 10px;
+                                            height: 10px;
+                                            background: #ef4444;
+                                            border-radius: 3px;
+                                            margin-right: 4px;
+                                        "
+                                    ></span
+                                    >Issued</span
+                                >
+                            </div>
+                        </div>
+                        <div
+                            id="seat-grid"
+                            style="
+                                display: flex;
+                                flex-wrap: wrap;
+                                gap: 5px;
+                                max-height: 220px;
+                                overflow-y: auto;
+                                padding: 4px;
+                            "
+                        ></div>
+                    </div>
+
+                    <!-- Issuance Table -->
+                    <div>
+                        <div
+                            style="
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                margin-bottom: 12px;
+                            "
+                        >
+                            <h4 style="margin: 0">
+                                <i
+                                    class="fa-solid fa-list-check"
+                                    style="color: var(--color-primary); margin-right: 6px"
+                                ></i
+                                >Issued Tickets
+                            </h4>
+                            <input
+                                type="text"
+                                id="ticket-table-search"
+                                placeholder="Search email..."
+                                style="
+                                    padding: 6px 12px;
+                                    border: 1px solid #e2e8f0;
+                                    border-radius: 8px;
+                                    font-size: 0.75rem;
+                                    outline: none;
+                                    width: 140px;
+                                "
+                                aria-label="Search email..."
+                            />
+                        </div>
+                        <div style="overflow-x: auto">
+                            <table
+                                style="width: 100%; border-collapse: collapse; font-size: 0.78rem"
+                            >
+                                <thead>
+                                    <tr style="background: var(--bg-surface-elevated)">
+                                        <th
+                                            style="
+                                                padding: 10px 12px;
+                                                text-align: left;
+                                                font-size: 0.65rem;
+                                                font-weight: 800;
+                                                color: var(--text-muted);
+                                            "
+                                        >
+                                            ATTENDEE
+                                        </th>
+                                        <th
+                                            style="
+                                                padding: 10px 12px;
+                                                text-align: left;
+                                                font-size: 0.65rem;
+                                                font-weight: 800;
+                                                color: var(--text-muted);
+                                            "
+                                        >
+                                            SEAT
+                                        </th>
+                                        <th
+                                            style="
+                                                padding: 10px 12px;
+                                                text-align: left;
+                                                font-size: 0.65rem;
+                                                font-weight: 800;
+                                                color: var(--text-muted);
+                                            "
+                                        >
+                                            BATCH
+                                        </th>
+                                        <th
+                                            style="
+                                                padding: 10px 12px;
+                                                text-align: left;
+                                                font-size: 0.65rem;
+                                                font-weight: 800;
+                                                color: var(--text-muted);
+                                            "
+                                        >
+                                            TICKET ID
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ticket-table-body"></tbody>
+                            </table>
+                            <p
+                                id="ticket-table-empty"
+                                style="
+                                    text-align: center;
+                                    padding: 20px;
+                                    color: var(--text-muted);
+                                    font-size: 0.8rem;
+                                "
+                            >
+                                No tickets issued yet.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Stats Tab -->
+            <div id="tab-live" class="tab-content">
+                <div
+                    class="admin-card"
+                    style="
+                        background: var(--bg-surface-elevated);
+                        border-left: 4px solid var(--color-primary);
+                    "
+                >
+                    <label
+                        style="
+                            display: block;
+                            font-size: 0.75rem;
+                            font-weight: 700;
+                            color: var(--color-primary);
+                            margin-bottom: 8px;
+                        "
+                        >ACTIVE EVENT CONTEXT</label
+                    >
+                    <select
+                        id="stats-ev-context"
+                        class="admin-input"
+                        style="font-weight: 700"
+                        aria-label="stats ev context"
+                    >
+                        <option value="">Select Event to Monitor...</option>
+                    </select>
+                    <p class="subtext" style="margin-top: 8px; font-size: 0.7rem">
+                        Live queues and heatmaps will be associated with this event's operational
+                        period.
+                    </p>
+                </div>
+
+                <div class="admin-card">
+                    <h3 style="margin-bottom: 16px">Queue Control</h3>
+                    <div
+                        style="
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 12px;
+                            margin-bottom: 16px;
+                        "
+                    >
+                        <input
+                            type="text"
+                            id="q-id"
+                            class="admin-input"
+                            placeholder="ID (e.g. q1)"
+                            aria-label="ID (e.g. q1)"
+                        />
+                        <input
+                            type="text"
+                            id="q-type"
+                            class="admin-input"
+                            placeholder="Type (Restroom)"
+                            aria-label="Type (Restroom)"
+                        />
+                    </div>
+                    <div
+                        style="
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 12px;
+                            margin-bottom: 16px;
+                        "
+                    >
+                        <input
+                            type="text"
+                            id="q-sec"
+                            class="admin-input"
+                            placeholder="Section"
+                            aria-label="Section"
+                        />
+                        <input
+                            type="number"
+                            id="q-wait"
+                            class="admin-input"
+                            placeholder="Wait (min)"
+                            aria-label="Wait (min)"
+                        />
+                    </div>
+                    <select
+                        id="q-status"
+                        class="admin-input"
+                        style="margin-bottom: 16px"
+                        aria-label="q status"
+                    >
+                        <option value="Fast">Fast</option>
+                        <option value="Moderate">Moderate</option>
+                        <option value="Busy">Busy</option>
+                    </select>
+                    <button id="btn-save-q" class="btn btn-primary" style="width: 100%">
+                        Sync Queue Data
+                    </button>
+                </div>
+
+                <div class="admin-card">
+                    <h3 style="margin-bottom: 16px">Occupancy Heatmap</h3>
+                    <div
+                        style="
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 12px;
+                            margin-bottom: 16px;
+                        "
+                    >
+                        <input
+                            type="text"
+                            id="h-id"
+                            class="admin-input"
+                            placeholder="Zone ID"
+                            aria-label="Zone ID"
+                        />
+                        <input
+                            type="text"
+                            id="h-name"
+                            class="admin-input"
+                            placeholder="Zone Name"
+                            aria-label="Zone Name"
+                        />
+                    </div>
+                    <select
+                        id="h-status"
+                        class="admin-input"
+                        style="margin-bottom: 16px"
+                        aria-label="h status"
+                    >
+                        <option value="fast">Low Density</option>
+                        <option value="moderate">Medium Density</option>
+                        <option value="busy">High Density</option>
+                    </select>
+                    <button id="btn-save-h" class="btn btn-primary" style="width: 100%">
+                        Update Density
+                    </button>
+                </div>
+
+                <div class="admin-card">
+                    <h3 style="margin-bottom: 16px">Live Crowd Overview</h3>
+                    <div id="admin-heatmap-list">
+                        <p class="subtext">Awaiting density sync...</p>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <h3 style="margin-bottom: 16px">Live Fleet Map</h3>
+                    <div id="admin-user-locations" style="max-height: 300px; overflow-y: auto">
+                        <p class="subtext">No active connections...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Tab -->
+            <div id="tab-emergency" class="tab-content">
+                <div
+                    class="admin-card"
+                    style="
+                        border: 2px solid var(--color-danger);
+                        background: #fff5f5;
+                        margin-bottom: 24px;
+                    "
+                >
+                    <h2 style="color: var(--color-danger); margin-bottom: 16px">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Emergency Response
+                    </h2>
+                    <p style="margin-bottom: 24px; color: #991b1b; font-weight: 600">
+                        Warning: This will broadcast an un-ignorable emergency alert to ALL
+                        connected user devices instantly.
+                    </p>
+
+                    <button
+                        id="btn-emergency"
+                        class="btn btn-alert"
+                        style="width: 100%; height: 80px; font-size: 1.1rem; margin-bottom: 24px"
+                    >
+                        ACTIVATE EMERGENCY OVERRIDE
+                    </button>
+
+                    <div
+                        style="
+                            border-top: 1px solid rgba(0, 0, 0, 0.1);
+                            padding-top: 24px;
+                            text-align: center;
+                        "
+                    >
+                        <p style="font-size: 0.75rem; color: var(--text-muted)">
+                            Dangerous Operations are now managed from the dashboard header.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <h3 style="margin-bottom: 16px; color: var(--color-danger)">
+                        <i class="fa-solid fa-life-ring"></i> Assistance Requests
+                    </h3>
+                    <div id="assistance-requests-list" style="max-height: 500px; overflow-y: auto">
+                        <p class="subtext">Awaiting calls for support...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Devices Tab -->
+            <div id="tab-devices" class="tab-content">
+                <div class="admin-card">
+                    <h3 style="margin-bottom: 16px">
+                        <i class="fa-solid fa-microchip"></i> Device Integration
+                    </h3>
+                    <p class="subtext" style="margin-bottom: 24px">
+                        Connect CCTV, Wi-Fi APs, and IoT sensors to your event zones.
+                    </p>
+
+                    <div
+                        style="
+                            background: var(--bg-surface-elevated);
+                            padding: 20px;
+                            border-radius: 12px;
+                            margin-bottom: 24px;
+                        "
+                    >
+                        <div class="input-group">
+                            <label>Select Event Context</label>
+                            <select
+                                id="dev-ev-id"
+                                class="admin-input"
+                                aria-label="dev ev id"
+                            ></select>
+                        </div>
+                        <div
+                            style="
+                                display: grid;
+                                grid-template-columns: 1fr 1fr;
+                                gap: 16px;
+                                margin-bottom: 16px;
+                            "
+                        >
+                            <div class="input-group">
+                                <label>Device Type</label>
+                                <select id="dev-type" class="admin-input" aria-label="dev type">
+                                    <option value="CCTV">CCTV Camera</option>
+                                    <option value="WiFi">Wi-Fi Access Point</option>
+                                    <option value="IoT">IoT Sensor</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Zone Location</label>
+                                <input
+                                    type="text"
+                                    id="dev-zone"
+                                    class="admin-input"
+                                    placeholder="e.g. Main Entrance"
+                                    aria-label="e.g. Main Entrance"
+                                />
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Device Name</label>
+                            <input
+                                type="text"
+                                id="dev-name"
+                                class="admin-input"
+                                placeholder="e.g. Cam_Gate_01"
+                                aria-label="e.g. Cam_Gate_01"
+                            />
+                        </div>
+                        <div class="input-group">
+                            <label id="dev-config-label">Stream URL / API Endpoint</label>
+                            <input
+                                type="text"
+                                id="dev-config"
+                                class="admin-input"
+                                placeholder="rtsp://... or https://api..."
+                                aria-label="rtsp://... or https://api..."
+                            />
+                        </div>
+                        <button id="btn-save-device" class="btn btn-primary" style="width: 100%">
+                            <i class="fa-solid fa-plus-circle"></i> Register Device
+                        </button>
+                    </div>
+
+                    <div id="admin-devices-list">
+                        <p class="subtext">No devices registered for this event.</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script type="module">
-        import { initFirebase, loginWithEmail, listenForUserEvents, saveEvent, updateEvent, deleteEvent, sendNotification, monitorAuth, updateQueue, updateHeatmap, listenForUserLocations, generateTickets, issueTicketToUser, getEventTicketsSummary, listenForTicketRequests, updateTicketRequestStatus, listenForAssistanceRequests, deleteAllMyEvents, saveDevice, deleteDevice, listenForDevices, secureConfig, listenForHeatmap } from '/js/firebase-config.js';
-        
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initFirebase();
-            
-            const authView = document.getElementById('admin-auth');
-            const dashView = document.getElementById('admin-dashboard');
-            let editingId = null;
-            let loggedInUser = null;
-            let adminReqSearchQuery = '';
-            
-            // Tab Logic
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.onclick = () => {
-                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    tab.classList.add('active');
-                    document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
-                };
-            });
-
-            monitorAuth(user => {
-                if (user) {
-                    loggedInUser = user;
-                    authView.classList.add('hidden');
-                    dashView.classList.remove('hidden');
-                    document.getElementById('admin-display-name').innerText = user.email.split('@')[0];
-                    loadEvents();
-                } else {
-                    loggedInUser = null;
-                    authView.classList.remove('hidden');
-                    dashView.classList.add('hidden');
-                }
-            });
-            
-            document.getElementById('btn-admin-login').addEventListener('click', async () => {
-                const e = document.getElementById('admin-email').value;
-                const p = document.getElementById('admin-pass').value;
-                try {
-                    await loginWithEmail(e, p);
-                } catch(error) {
-                    document.getElementById('admin-err').innerText = error.message;
-                }
-            });
-
-            document.getElementById('btn-emergency').addEventListener('click', async () => {
-                if(!confirm("ARE YOU SURE? THIS WILL ALERT EVERYONE.")) return;
-                const btn = document.getElementById('btn-emergency');
-                btn.innerText = "BROADCASTING...";
-                try {
-                    await sendNotification("Emergency Alert: Proceed to nearest exits immediately. Avoid gates with high congestion.", "emergency");
-                    alert("EMERGENCY ALERT BROADCASTED!");
-                } catch(e) { alert("Failed to broadcast alert."); }
-                btn.innerText = "ACTIVATE EMERGENCY OVERRIDE";
-            });
-
-            document.getElementById('btn-delete-all-events').addEventListener('click', async () => {
-                if(!confirm("SECURE DELETE: This will delete ALL events created by YOU. Other admins' data will remain safe. Proceed?")) return;
-                const btn = document.getElementById('btn-delete-all-events');
-                btn.innerText = "Deleting Your Events...";
-                try {
-                    await deleteAllMyEvents(loggedInUser.uid);
-                    alert("Your managed events have been removed.");
-                    window.location.reload();
-                } catch(e) { alert("Delete failed: " + e.message); }
-                btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Delete All My Events';
-            });
-
-            document.getElementById('ev-charge-fees').addEventListener('change', (e) => {
-                document.getElementById('fee-config').classList.toggle('hidden', !e.target.checked);
-            });
-
-            document.getElementById('btn-save-event').addEventListener('click', async () => {
-                const btn = document.getElementById('btn-save-event');
-                btn.innerText = "Updating Cloud...";
-                
-                const data = {
-                    title: document.getElementById('ev-name').value,
-                    date: document.getElementById('ev-date').value,
-                    time: `${document.getElementById('ev-time-start').value} to ${document.getElementById('ev-time-end').value}`,
-                    location: document.getElementById('ev-loc').value,
-                    description: document.getElementById('ev-desc').value,
-                    totalAttendees: parseInt(document.getElementById('ev-total').value) || 0,
-                    numBatches: parseInt(document.getElementById('ev-batches').value) || 5,
-                    allowMulti: document.getElementById('ev-allow-multi').checked,
-                    chargeFees: document.getElementById('ev-charge-fees').checked,
-                    feeNote: document.getElementById('ev-fee-note').value || ''
-                };
-                
-                try {
-                    if (editingId) {
-                        await updateEvent(editingId, data);
-                        editingId = null;
-                        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Push Event Update';
-                    } else {
-                        await saveEvent(data, loggedInUser.uid);
-                    }
-                    // Reset fields
-                    ['ev-name','ev-loc','ev-desc','ev-total','ev-batches','ev-fee-note', 'ev-time-start', 'ev-time-end'].forEach(id => {
-                        const el = document.getElementById(id);
-                        if(el) el.value = '';
-                    });
-                    document.getElementById('ev-charge-fees').checked = false;
-                    document.getElementById('fee-config').classList.add('hidden');
-                    alert("Sync Successful!");
-                } catch(e) { alert('Error: ' + e.message); }
-                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Push Event Update';
-            });
-
-            document.getElementById('btn-save-q').onclick = async () => {
-                const id = document.getElementById('q-id').value;
-                const evContext = document.getElementById('stats-ev-context');
-                const evName = evContext.options[evContext.selectedIndex]?.text || "Venue";
-                
-                const data = {
-                    type: document.getElementById('q-type').value,
-                    section: document.getElementById('q-sec').value,
-                    waitTimeMins: parseInt(document.getElementById('q-wait').value) || 0,
-                    status: document.getElementById('q-status').value
-                };
-                try { 
-                    await updateQueue(id, data); 
-                    alert(`Queue Synced for ${evName}`); 
-                } catch(e) { alert(e.message); }
-            };
-
-            document.getElementById('btn-save-h').onclick = async () => {
-                const id = document.getElementById('h-id').value;
-                const evContext = document.getElementById('stats-ev-context');
-                const evName = evContext.options[evContext.selectedIndex]?.text || "Venue";
-
-                const data = {
-                    name: document.getElementById('h-name').value,
-                    status: document.getElementById('h-status').value,
-                    lat: 51.556, lng: -0.279, congestion: 50 // Defaults
-                };
-                try { 
-                    await updateHeatmap(id, data); 
-                    alert(`Heatmap Synced for ${evName}`); 
-                } catch(e) { alert(e.message); }
-            };
-
-            document.getElementById('btn-issue-tkt').onclick = async () => {
-                const evId = document.getElementById('issue-ev-id').value;
-                const email = document.getElementById('issue-email').value;
-                const status = document.getElementById('issue-status');
-                try {
-                    await issueTicketToUser(evId, email);
-                    status.innerText = "Success: Issued to " + email;
-                    status.style.color = "var(--color-success)";
-                } catch (e) { status.innerText = e.message; status.style.color = "var(--color-danger)"; }
-            };
-
-            function loadEvents() {
-                if (!loggedInUser) return;
-                listenForUserEvents(loggedInUser.uid, (events) => {
-                    const list = document.getElementById('admin-events-list');
-                    list.innerHTML = events.map(ev => `
-                        <div class="event-list-item">
-                            <div>
-                                <strong style="display:block;">${ev.title || ev.name}</strong>
-                                <span style="font-size: 0.75rem; color: var(--text-secondary);">${ev.date} | ${ev.location}</span>
-                                <span style="display:block; font-size: 0.65rem; color: var(--color-primary); margin-top: 4px;">ID: ${ev.id}</span>
-                            </div>
-                            <div style="display:flex; gap: 8px;">
-                                <button class="btn btn-secondary edit-btn" data-id="${ev.id}" style="padding: 6px 10px;"><i class="fa-solid fa-pen"></i></button>
-                                <button class="btn btn-alert delete-btn" data-id="${ev.id}" style="padding: 6px 10px;"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </div>
-                    `).join('');
-
-                    document.querySelectorAll('.delete-btn').forEach(btn => {
-                        btn.onclick = async () => { 
-                            if(!confirm("Delete this event and all associated data?")) return;
-                            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-                            btn.disabled = true;
-                            try {
-                                await deleteEvent(btn.dataset.id);
-                                alert("Event deleted successfully.");
-                            } catch(e) { 
-                                alert("Delete failed: " + e.message); 
-                                btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-                                btn.disabled = false;
-                            }
-                        };
-                    });
-                    
-                    document.querySelectorAll('.edit-btn').forEach(btn => {
-                        btn.onclick = () => {
-                            const ev = events.find(x => x.id === btn.dataset.id);
-                            if(ev) {
-                                document.getElementById('ev-name').value = ev.title || '';
-                                document.getElementById('ev-date').value = ev.date || '';
-                                if (ev.time && ev.time.includes(' to ')) {
-                                    const [start, end] = ev.time.split(' to ');
-                                    document.getElementById('ev-time-start').value = start;
-                                    document.getElementById('ev-time-end').value = end;
-                                }
-                                document.getElementById('ev-loc').value = ev.location || '';
-                                document.getElementById('ev-desc').value = ev.description || '';
-                                document.getElementById('ev-total').value = ev.totalAttendees || '';
-                                document.getElementById('ev-batches').value = ev.numBatches || '';
-                                document.getElementById('ev-charge-fees').checked = ev.chargeFees || false;
-                                document.getElementById('fee-config').classList.toggle('hidden', !ev.chargeFees);
-                                editingId = ev.id;
-                                document.getElementById('btn-save-event').innerText = "Update Event Data";
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }
-                        };
-                    });
-
-                    const optionsHTML = '<option value="">Choose Event...</option>' + events.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
-                    document.getElementById('issue-ev-id').innerHTML = optionsHTML;
-                    document.getElementById('stats-ev-context').innerHTML = optionsHTML;
-                    document.getElementById('dev-ev-id').innerHTML = optionsHTML;
-                });
-
-                // Global Dashboard Listeners (Decoupled from User Events)
-                let lastRequests = [];
-                listenForTicketRequests((requests) => { 
-                    lastRequests = requests; 
-                    renderTicketRequests(requests); 
-                });
-
-                listenForAssistanceRequests((requests) => {
-                    renderAssistanceRequests(requests);
-                });
-
-                listenForUserLocations((locations) => {
-                    renderUserLocations(locations);
-                });
-
-                listenForHeatmap((zones) => {
-                    renderAdminHeatmap(zones);
-                });
-
-                function renderAdminHeatmap(zones) {
-                    const list = document.getElementById('admin-heatmap-list');
-                    list.innerHTML = zones.length ? zones.map(z => `
-                        <div class="flex-row" style="padding: 10px; background: var(--bg-surface-elevated); border-radius: 8px; margin-bottom: 8px;">
-                            <div>
-                                <span style="font-weight: 700; font-size: 0.85rem;">${z.name}</span>
-                                <span style="display:block; font-size: 0.7rem; color: var(--text-muted);">Zone: ${z.id}</span>
-                            </div>
-                            <span class="status-badge ${z.status}" style="font-size: 0.65rem;">${z.status.toUpperCase()}</span>
-                        </div>
-                    `).join('') : '<p class="subtext">No zones tracked.</p>';
-                }
-
-                function renderTicketRequests(requests) {
-                    const list = document.getElementById('ticket-requests-list');
-                    // Filter: Only show requests for events owned by this admin
-                    let filtered = requests.filter(r => r.eventOwnerId === loggedInUser.uid);
-                    
-                    if (adminReqSearchQuery) {
-                        filtered = filtered.filter(r => (r.userName || '').toLowerCase().includes(adminReqSearchQuery) || (r.userEmail || '').toLowerCase().includes(adminReqSearchQuery));
-                    }
-                    list.innerHTML = filtered.length ? filtered.map(req => `
-                        <div class="card" style="margin-bottom: 12px; border-left: 4px solid ${req.status === 'conditional' ? 'orange' : 'var(--color-primary-light)'};">
-                            <div class="flex-row">
-                                <div>
-                                    <strong style="display:block;">${req.userName}</strong>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted);">${req.userEmail}</span>
-                                    <p style="margin-top: 4px; font-size: 0.8rem; font-weight: 700; color: var(--color-primary);">${req.eventTitle}</p>
-                                </div>
-                                <div style="display:flex; gap: 8px;">
-                                    <button class="btn btn-primary btn-issue-req" data-id="${req.id}" data-email="${req.userEmail}" data-evid="${req.eventId}" style="padding: 6px 12px; font-size: 0.7rem;">Issue</button>
-                                    <button class="btn btn-secondary btn-condition-req" data-id="${req.id}" style="padding: 6px 12px; font-size: 0.7rem;">Note</button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('') : '<p class="subtext">No pending signals.</p>';
-
-                    document.querySelectorAll('.btn-issue-req').forEach(btn => {
-                        btn.onclick = async () => {
-                            if(confirm("Issue ticket?")) {
-                                try {
-                                    await issueTicketToUser(btn.dataset.evid, btn.dataset.email);
-                                    await updateTicketRequestStatus(btn.dataset.id, 'fulfilled');
-                                } catch(e) { alert(e.message); }
-                            }
-                        };
-                    });
-                    document.querySelectorAll('.btn-condition-req').forEach(btn => {
-                        btn.onclick = async () => {
-                            const note = prompt("Condition/Note for user:");
-                            if(note) await updateTicketRequestStatus(btn.dataset.id, 'conditional', note);
-                        };
-                    });
-                };
-
-                document.getElementById('admin-req-search').oninput = (e) => {
-                    adminReqSearchQuery = e.target.value.toLowerCase();
-                    renderTicketRequests(lastRequests);
-                };
-
-                function renderAssistanceRequests(requests) {
-                    const list = document.getElementById('assistance-requests-list');
-                    // Filter: Only show requests for events owned by this admin
-                    const filtered = requests.filter(r => r.eventOwnerId === loggedInUser.uid);
-                    
-                    list.innerHTML = filtered.length ? filtered.map(req => `
-                        <div class="card" style="margin-bottom: 12px; border-left: 4px solid var(--color-danger);">
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 8px;">
-                                <div>
-                                    <strong style="display:block; font-size: 1rem;">${req.userName}</strong>
-                                    <span style="font-size: 0.75rem; color: var(--text-muted);">${req.userEmail}</span>
-                                </div>
-                                <span style="font-size: 0.7rem; color: var(--text-muted);">${req.timestamp?.toDate().toLocaleTimeString() || 'Just now'}</span>
-                            </div>
-                            <p style="font-size: 0.85rem; color: var(--text-primary); background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
-                                <i class="fa-solid fa-quote-left" style="opacity: 0.2; margin-right: 8px;"></i>${req.message}
-                            </p>
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.75rem;">
-                                <div><i class="fa-solid fa-calendar-day"></i> ${req.eventName}</div>
-                                <div><i class="fa-solid fa-clock"></i> ${req.eventTime}</div>
-                                ${req.location ? `<div style="grid-column: span 2; color: var(--color-primary); font-weight: 700;"><i class="fa-solid fa-location-crosshairs"></i> ${req.location.lat.toFixed(4)}, ${req.location.lng.toFixed(4)}</div>` : ''}
-                            </div>
-                        </div>
-                    `).join('') : '<p class="subtext">No active calls for support.</p>';
-                }
-
-                function renderUserLocations(locations) {
-                    const list = document.getElementById('admin-user-locations');
-                    // Filter: Only show users associated with this admin's events
-                    const filtered = locations.filter(loc => loc.eventOwnerId === loggedInUser.uid);
-
-                    list.innerHTML = filtered.length ? filtered.map(loc => `
-                        <div class="flex-row" style="padding: 12px; border-bottom: 1px solid var(--bg-surface-elevated);">
-                            <span style="font-size: 0.8rem; font-weight: 700;">${loc.userName || 'Unknown User'}</span>
-                            <span style="font-size: 0.75rem; color: var(--text-muted);">${loc.lat.toFixed(3)}, ${loc.lng.toFixed(3)}</span>
-                        </div>
-                    `).join('') : '<p class="subtext">Awaiting GPS signals...</p>';
-                }
-
-                // Device Integration Logic
-                document.getElementById('dev-type').onchange = (e) => {
-                    const label = document.getElementById('dev-config-label');
-                    const input = document.getElementById('dev-config');
-                    if (e.target.value === 'CCTV') {
-                        label.innerText = 'RTSP/HTTP Stream URL';
-                        input.placeholder = 'rtsp://...';
-                    } else if (e.target.value === 'WiFi') {
-                        label.innerText = 'Router API Key';
-                        input.placeholder = 'sk_live_...';
-                    } else {
-                        label.innerText = 'MQTT Topic / REST Endpoint';
-                        input.placeholder = 'venue/entrance';
-                    }
-                };
-
-                document.getElementById('btn-save-device').onclick = async () => {
-                    const evId = document.getElementById('dev-ev-id').value;
-                    if (!evId) return alert("Select an event first!");
-                    
-                    const data = {
-                        type: document.getElementById('dev-type').value,
-                        zone: document.getElementById('dev-zone').value,
-                        name: document.getElementById('dev-name').value,
-                        config: document.getElementById('dev-config').value
-                    };
-                    
-                    try {
-                        await saveDevice(evId, data, loggedInUser.uid);
-                        alert("Device Registered!");
-                        ['dev-zone', 'dev-name', 'dev-config'].forEach(id => document.getElementById(id).value = '');
-                    } catch(e) { alert(e.message); }
-                };
-
-                document.getElementById('dev-ev-id').onchange = (e) => {
-                    const evId = e.target.value;
-                    if (evId) {
-                        listenForDevices(evId, (devices) => {
-                            const list = document.getElementById('admin-devices-list');
-                            list.innerHTML = devices.length ? devices.map(dev => `
-                                <div class="card" style="margin-bottom: 12px; border-left: 4px solid var(--color-primary);">
-                                    <div class="flex-row">
-                                        <div>
-                                            <strong style="display:block;">${dev.name}</strong>
-                                            <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">${dev.type} | Zone: ${dev.zone}</span>
-                                        </div>
-                                        <button class="btn btn-alert btn-del-dev" data-id="${dev.id}" data-evid="${evId}" style="padding: 4px 8px;"><i class="fa-solid fa-trash"></i></button>
-                                    </div>
-                                    <p style="font-size: 0.75rem; background: var(--bg-surface-elevated); padding: 8px; border-radius: 6px; margin-top: 10px; word-break: break-all;">
-                                        <i class="fa-solid fa-link"></i> ${secureConfig(dev.config, false)}
-                                    </p>
-                                </div>
-                            `).join('') : '<p class="subtext">No devices registered for this event.</p>';
-
-                            document.querySelectorAll('.btn-del-dev').forEach(btn => {
-                                btn.onclick = async () => {
-                                    if(confirm("Remove device?")) {
-                                        await deleteDevice(btn.dataset.evid, btn.dataset.id, loggedInUser.uid);
-                                    }
-                                };
-                            });
-                        });
-                    }
-                };
-            }
-        });
-    </script>
-</body>
+        <script type="module" src="/dist/admin-app.js"></script>
+    </body>
 </html>

@@ -1,5 +1,19 @@
 import { navigateTo, initRouter, handleUserAuth } from './router.js';
-import { initFirebase, listenForNotifications, loginWithEmail, signUpWithEmail, loginWithGoogle, logoutUser, monitorAuth, saveToSchedule, getUserProfile, deleteUserAccount, submitAssistanceRequest, cleanupExpiredData, deleteTicket } from './firebase-config.js';
+import {
+    initFirebase,
+    listenForNotifications,
+    loginWithEmail,
+    signUpWithEmail,
+    loginWithGoogle,
+    logoutUser,
+    monitorAuth,
+    saveToSchedule,
+    getUserProfile,
+    deleteUserAccount,
+    submitAssistanceRequest,
+    cleanupExpiredData,
+    deleteTicket,
+} from './firebase-config.js';
 
 export let currentUser = null;
 let isSignupMode = false;
@@ -12,20 +26,22 @@ const setupAuthUI = () => {
     const signupFields = document.getElementById('signup-fields');
     const authTitle = document.getElementById('auth-title');
     const authSubtitle = document.getElementById('auth-subtitle');
-    
+
     const updateAuthUI = () => {
         if (isSignupMode) {
-            authTitle.innerText = "Create Account";
-            authSubtitle.innerText = "Join the Smart Venue Navigator today.";
-            signupFields.style.display = "block";
-            primaryBtn.innerHTML = '<i class="fa-solid fa-user-plus" style="margin-right: 8px;"></i> Sign Up';
-            toggleBtn.innerText = "Already have an account? Sign In";
+            authTitle.innerText = 'Create Account';
+            authSubtitle.innerText = 'Join the Smart Venue Navigator today.';
+            signupFields.style.display = 'block';
+            primaryBtn.innerHTML =
+                '<i class="fa-solid fa-user-plus" style="margin-right: 8px;"></i> Sign Up';
+            toggleBtn.innerText = 'Already have an account? Sign In';
         } else {
-            authTitle.innerText = "Login required";
-            authSubtitle.innerText = "Please login to access the Smart Venue Navigator.";
-            signupFields.style.display = "none";
-            primaryBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i> Sign In';
-            toggleBtn.innerText = "Need an account? Sign Up";
+            authTitle.innerText = 'Login required';
+            authSubtitle.innerText = 'Please login to access the Smart Venue Navigator.';
+            signupFields.style.display = 'none';
+            primaryBtn.innerHTML =
+                '<i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i> Sign In';
+            toggleBtn.innerText = 'Need an account? Sign Up';
         }
     };
 
@@ -48,7 +64,7 @@ const setupAuthUI = () => {
     primaryBtn.addEventListener('click', () => {
         const email = document.getElementById('auth-email').value;
         const pass = document.getElementById('auth-pass').value;
-        
+
         if (isSignupMode) {
             const name = document.getElementById('reg-name').value;
             const address = document.getElementById('reg-address').value;
@@ -66,7 +82,7 @@ const setupAuthUI = () => {
         handleAuth(loginWithGoogle);
     });
 
-    monitorAuth(user => {
+    monitorAuth((user) => {
         currentUser = user;
         handleUserAuth(user);
         if (user) {
@@ -106,39 +122,45 @@ const setupModals = () => {
             `;
             modalContainer.classList.remove('hidden');
         }
-        
+
         if (e.target.closest('#btn-logout')) {
             logoutUser().then(() => {
                 modalContainer.classList.add('hidden');
-                
+
                 // Clear UI state
                 currentUser = null;
                 isSignupMode = false;
-                
+
                 // Manually clear inputs in case of browser auto-fill/cache
                 const emailField = document.getElementById('auth-email');
                 const passField = document.getElementById('auth-pass');
                 const nameField = document.getElementById('reg-name');
                 const addrField = document.getElementById('reg-address');
-                
+
                 if (emailField) emailField.value = '';
                 if (passField) passField.value = '';
                 if (nameField) nameField.value = '';
                 if (addrField) addrField.value = '';
-                
+
                 // Fully reload to clear all in-memory variables and listeners
-                window.location.href = '/'; 
+                window.location.href = '/';
             });
         }
-        
+
         if (e.target.closest('#btn-delete-account')) {
-            if (confirm("WARNING: This will permanently delete your account and all profile data. This cannot be undone. Proceed?")) {
-                deleteUserAccount().then(() => {
-                    alert("Account deleted successfully.");
-                    window.location.href = '/';
-                }).catch(err => {
-                    alert(err.message);
-                });
+            if (
+                confirm(
+                    'WARNING: This will permanently delete your account and all profile data. This cannot be undone. Proceed?'
+                )
+            ) {
+                deleteUserAccount()
+                    .then(() => {
+                        alert('Account deleted successfully.');
+                        window.location.href = '/';
+                    })
+                    .catch((err) => {
+                        alert(err.message);
+                    });
             }
         }
 
@@ -146,29 +168,33 @@ const setupModals = () => {
             const btn = e.target.closest('.btn-delete-ticket');
             const evId = btn.getAttribute('data-event-id');
             const tktId = btn.getAttribute('data-ticket-id');
-            if (confirm("Return this ticket? This will free up your spot for others.")) {
-                deleteTicket(evId, tktId).then(() => {
-                    navigateTo('home'); // Refresh
-                }).catch(err => alert("Error returning ticket: " + err.message));
+            if (confirm('Return this ticket? This will free up your spot for others.')) {
+                deleteTicket(evId, tktId)
+                    .then(() => {
+                        navigateTo('home'); // Refresh
+                    })
+                    .catch((err) => alert('Error returning ticket: ' + err.message));
             }
         }
         if (e.target.closest('.btn-save-schedule')) {
             const btn = e.target.closest('.btn-save-schedule');
             const eventId = btn.getAttribute('data-event-id');
-            if(currentUser) {
-                saveToSchedule(currentUser.uid, eventId).then(() => {
-                    btn.innerHTML = `<i class="fa-solid fa-check" style="margin-right:8px;"></i> Saved`;
-                    btn.classList.add('saved');
-                    btn.style.background = 'var(--color-success)';
-                    btn.disabled = true;
-                }).catch(err => alert("Failed to save event."));
+            if (currentUser) {
+                saveToSchedule(currentUser.uid, eventId)
+                    .then(() => {
+                        btn.innerHTML = `<i class="fa-solid fa-check" style="margin-right:8px;"></i> Saved`;
+                        btn.classList.add('saved');
+                        btn.style.background = 'var(--color-success)';
+                        btn.disabled = true;
+                    })
+                    .catch((err) => alert('Failed to save event.'));
             } else {
                 document.getElementById('auth-overlay').classList.remove('hidden');
             }
         }
-        
+
         if (e.target.closest('#btn-sync-calendar')) {
-            import('./calendar-sync.js').then(module => {
+            import('./calendar-sync.js').then((module) => {
                 module.syncGoogleCalendar();
             });
         }
@@ -178,18 +204,18 @@ const setupModals = () => {
 };
 
 const initApp = async () => {
-    console.log("🚀 Starting SVN UI Initialization...");
+    console.log('🚀 Starting SVN UI Initialization...');
     // 1. Initialize Firebase (waits for server API keys)
     await initFirebase();
-    console.log("✅ Firebase init sequence finished (isLive: " + window.isLive + ")");
-    
+    console.log('✅ Firebase init sequence finished (isLive: ' + window.isLive + ')');
+
     // Initialize Router Listeners
     initRouter();
-    
+
     // 2. Setup Modals & Auth Listeners
     setupModals();
     setupAuthUI();
-    console.log("✅ Modals and Auth UI bound");
+    console.log('✅ Modals and Auth UI bound');
 
     // 3. Setup router hash listener
     window.addEventListener('hashchange', () => {
@@ -198,11 +224,11 @@ const initApp = async () => {
     });
 
     // Attach click listeners to bottom nav
-    document.querySelectorAll('.nav-item').forEach(el => {
+    document.querySelectorAll('.nav-item').forEach((el) => {
         el.addEventListener('click', (e) => {
             e.preventDefault();
             const route = el.getAttribute('data-route');
-            if(route) window.location.hash = '#' + route;
+            if (route) window.location.hash = '#' + route;
         });
     });
 
@@ -218,11 +244,13 @@ const initApp = async () => {
         <button id="close-notif" style="background:none; border:none; color:var(--text-inverse); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
     `;
     document.body.appendChild(banner);
-    document.getElementById('close-notif').addEventListener('click', () => banner.classList.add('hidden'));
+    document
+        .getElementById('close-notif')
+        .addEventListener('click', () => banner.classList.add('hidden'));
 
     listenForNotifications((data) => {
         document.getElementById('notif-text').innerText = data.message;
-        if(data.type === 'emergency') {
+        if (data.type === 'emergency') {
             banner.className = 'notification-banner emergency';
             banner.querySelector('strong').innerText = 'Emergency Alert';
             banner.querySelector('i').className = 'fa-solid fa-bullhorn';
@@ -236,7 +264,7 @@ const initApp = async () => {
 
     // Trigger initial route
     navigateTo(window.location.hash.replace('#', '') || 'home');
-    console.log("✅ App initialization complete!");
+    console.log('✅ App initialization complete!');
 };
 
 if (document.readyState === 'loading') {

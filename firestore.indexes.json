@@ -1,0 +1,37 @@
+{
+    "indexes": [
+        {
+            "collectionGroup": "assistanceRequests",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "eventOwnerId", "order": "ASCENDING" },
+                { "fieldPath": "timestamp", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "ticketRequests",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "eventOwnerId", "order": "ASCENDING" },
+                { "fieldPath": "timestamp", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "ticketRequests",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "eventOwnerId", "order": "ASCENDING" },
+                { "fieldPath": "timestamp", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "events",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "ownerId", "order": "ASCENDING" },
+                { "fieldPath": "date", "order": "ASCENDING" }
+            ]
+        }
+    ],
+    "fieldOverrides": []
+}

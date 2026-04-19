@@ -2,7 +2,7 @@ const isEventPast = (dateStr, timeStr) => {
     if (!dateStr) return false;
     const today = new Date();
     const eventDate = new Date(dateStr);
-    
+
     today.setHours(0, 0, 0, 0);
     eventDate.setHours(0, 0, 0, 0);
 
@@ -19,14 +19,20 @@ const isEventPast = (dateStr, timeStr) => {
     return false;
 };
 
-export const renderHome = (events = [], savedScheduleIds = [], myTickets = [], myTicketRequests = [], searchQuery = '') => {
+export const renderHome = (
+    events = [],
+    savedScheduleIds = [],
+    myTickets = [],
+    myTicketRequests = [],
+    searchQuery = ''
+) => {
     // Filter everything first
-    const activeEvents = events.filter(e => !isEventPast(e.date, e.time));
-    const activeTickets = myTickets.filter(t => !isEventPast(t.eventDate, t.eventTime)); // Assuming tickets have date/time
-    const activeRequests = myTicketRequests.filter(r => !isEventPast(r.eventDate, r.eventTime));
+    const activeEvents = events.filter((e) => !isEventPast(e.date, e.time));
+    const activeTickets = myTickets.filter((t) => !isEventPast(t.eventDate, t.eventTime)); // Assuming tickets have date/time
+    const activeRequests = myTicketRequests.filter((r) => !isEventPast(r.eventDate, r.eventTime));
 
-    const savedEvents = activeEvents.filter(e => savedScheduleIds.includes(e.id));
-    const upcomingEvents = activeEvents.filter(e => !savedScheduleIds.includes(e.id));
+    const savedEvents = activeEvents.filter((e) => savedScheduleIds.includes(e.id));
+    const upcomingEvents = activeEvents.filter((e) => !savedScheduleIds.includes(e.id));
 
     const renderEventCard = (e, isSaved) => `
         <div class="card">
@@ -42,15 +48,19 @@ export const renderHome = (events = [], savedScheduleIds = [], myTickets = [], m
                 <i class="fa-solid fa-location-dot" style="margin-right: 4px;"></i> ${e.location}
             </p>
             <div class="flex-row" style="gap: 10px;">
-                ${isSaved ? `
+                ${
+                    isSaved
+                        ? `
                     <button class="btn btn-secondary" disabled style="flex: 1; opacity: 0.7;">
                        <i class="fa-solid fa-check"></i> Saved
                     </button>
-                ` : `
+                `
+                        : `
                     <button class="btn btn-secondary btn-save-schedule" data-event-id="${e.id}" style="flex: 1;">
                        <i class="fa-solid fa-bookmark"></i> Save
                     </button>
-                `}
+                `
+                }
                 <button class="btn btn-primary btn-request-ticket" data-event-id="${e.id}" data-event-title="${e.name || e.title}" style="flex: 1.5;">
                    <i class="fa-solid fa-paper-plane"></i> Get Ticket
                 </button>
@@ -58,11 +68,15 @@ export const renderHome = (events = [], savedScheduleIds = [], myTickets = [], m
         </div>
     `;
 
-    const ticketsHTML = activeTickets.length > 0 ? activeTickets.map(tkt => `
+    const ticketsHTML =
+        activeTickets.length > 0
+            ? activeTickets
+                  .map(
+                      (tkt) => `
         <div class="ticket">
             <div class="flex-row" style="margin-bottom: 16px;">
                 <h2 style="color: white; font-size: 1.3rem; margin: 0;">${tkt.eventTitle}</h2>
-                <i class="fa-solid fa-qrcode" style="font-size: 1.5rem; opacity: 0.8;"></i>
+                <i class="fa-solid fa-qrcode" style="font-size: 1.5rem; opacity: 0.8;" role="img" aria-label="QR Code"></i>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; font-size: 0.75rem; opacity: 0.9;">
                 <div><p>Seat</p><strong>${tkt.seat}</strong></div>
@@ -76,10 +90,13 @@ export const renderHome = (events = [], savedScheduleIds = [], myTickets = [], m
                         <i class="fa-solid fa-trash-can" style="font-size: 0.8rem;"></i>
                     </button>
                 </div>
-                ${tkt.lunchSlot !== "N/A" ? `<div style="margin-top: 8px; font-size: 0.75rem;"><i class="fa-solid fa-utensils" style="margin-right: 6px;"></i> Lunch: <strong>${tkt.lunchSlot}</strong></div>` : ''}
+                ${tkt.lunchSlot !== 'N/A' ? `<div style="margin-top: 8px; font-size: 0.75rem;"><i class="fa-solid fa-utensils" style="margin-right: 6px;"></i> Lunch: <strong>${tkt.lunchSlot}</strong></div>` : ''}
             </div>
         </div>
-    `).join('') : `
+    `
+                  )
+                  .join('')
+            : `
         <div class="card" style="text-align: center; border: 2px dashed var(--bg-surface-elevated); background: transparent;">
             <i class="fa-solid fa-ticket-simple" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 12px; display: block;"></i>
             <h4 style="color: var(--text-secondary);">No active tickets</h4>
@@ -87,14 +104,17 @@ export const renderHome = (events = [], savedScheduleIds = [], myTickets = [], m
         </div>
     `;
 
-    const requestsHTML = activeRequests.length > 0 ? `
+    const requestsHTML =
+        activeRequests.length > 0
+            ? `
         <div style="margin-bottom: 32px;">
             <div class="section-title"><span><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px; color: var(--color-accent);"></i> Pending Signals</span></div>
-            ${activeRequests.map(req => {
-                let statusClass = "badge-warning";
-                if (req.status === 'conditional') statusClass = "badge-warning";
-                if (req.status === 'fulfilled') statusClass = "badge-success";
-                return `
+            ${activeRequests
+                .map((req) => {
+                    let statusClass = 'badge-warning';
+                    if (req.status === 'conditional') statusClass = 'badge-warning';
+                    if (req.status === 'fulfilled') statusClass = 'badge-success';
+                    return `
                     <div class="card" style="padding: 12px 16px; border-left: 4px solid var(--color-primary-light);">
                         <div class="flex-row">
                             <strong style="font-size: 0.9rem;">${req.eventTitle}</strong>
@@ -103,9 +123,11 @@ export const renderHome = (events = [], savedScheduleIds = [], myTickets = [], m
                         ${req.adminNote ? `<p style="margin-top: 8px; font-size: 0.75rem; color: var(--color-warning); background: #FFFBEB; padding: 6px 10px; border-radius: 6px;"><i class="fa-solid fa-info-circle"></i> ${req.adminNote}</p>` : ''}
                     </div>
                 `;
-            }).join('')}
+                })
+                .join('')}
         </div>
-    ` : '';
+    `
+            : '';
 
     return `
         <div class="page" id="page-home">
@@ -128,13 +150,17 @@ export const renderHome = (events = [], savedScheduleIds = [], myTickets = [], m
             ${ticketsHTML}
             ${requestsHTML}
 
-            ${savedEvents.length > 0 ? `
+            ${
+                savedEvents.length > 0
+                    ? `
                 <div class="section-title">Your Schedule</div>
-                ${savedEvents.map(e => renderEventCard(e, true)).join('')}
-            ` : ''}
+                ${savedEvents.map((e) => renderEventCard(e, true)).join('')}
+            `
+                    : ''
+            }
 
             <div class="section-title">Upcoming Events</div>
-            ${upcomingEvents.map(e => renderEventCard(e, false)).join('')}
+            ${upcomingEvents.map((e) => renderEventCard(e, false)).join('')}
         </div>
     `;
 };
@@ -173,13 +199,24 @@ export const renderHeatmap = (zones = []) => {
             </div>
 
             <div id="heatmap-zones-list">
-                ${zones.length > 0 ? zones.map(z => {
-                    let color = "var(--color-success)";
-                    let width = "25%";
-                    let label = "Fast Moving";
-                    if (z.status === 'moderate') { color = "var(--color-warning)"; width = "60%"; label = "Moderate Traffic"; }
-                    if (z.status === 'busy') { color = "var(--color-danger)"; width = "95%"; label = "Congested Area"; }
-                    return `
+                ${
+                    zones.length > 0
+                        ? zones
+                              .map((z) => {
+                                  let color = 'var(--color-success)';
+                                  let width = '25%';
+                                  let label = 'Fast Moving';
+                                  if (z.status === 'moderate') {
+                                      color = 'var(--color-warning)';
+                                      width = '60%';
+                                      label = 'Moderate Traffic';
+                                  }
+                                  if (z.status === 'busy') {
+                                      color = 'var(--color-danger)';
+                                      width = '95%';
+                                      label = 'Congested Area';
+                                  }
+                                  return `
                         <div class="card" style="margin-bottom: 12px; padding: 18px; border-left: 4px solid ${color};">
                             <div class="flex-row" style="margin-bottom: 12px;">
                                 <div>
@@ -195,13 +232,16 @@ export const renderHeatmap = (zones = []) => {
                             </div>
                         </div>
                     `;
-                }).join('') : `
+                              })
+                              .join('')
+                        : `
                     <div style="text-align: center; padding: 40px 20px; background: white; border-radius: var(--border-radius-lg); border: 2px dashed var(--bg-surface-elevated);">
                         <i class="fa-solid fa-map-location" style="font-size: 2.5rem; color: var(--bg-surface-elevated); margin-bottom: 15px;"></i>
                         <h4 style="color: var(--text-secondary);">No Active Signals</h4>
                         <p style="font-size: 0.8rem; color: var(--text-muted);">Administrators haven't configured any density zones yet.</p>
                     </div>
-                `}
+                `
+                }
             </div>
         </div>
     `;
@@ -214,12 +254,13 @@ export const renderQueues = (queuesData) => {
             <p class="subtext" style="margin-bottom: 24px;">Wait times updated 1 min ago</p>
             
             <div class="queue-list" style="display: grid; gap: 16px;">
-                ${queuesData.map(q => {
-                    let icon = "fa-utensils";
-                    if (q.type.includes("Restroom")) icon = "fa-restroom";
-                    if (q.type.includes("Merch")) icon = "fa-bag-shopping";
-                    
-                    return `
+                ${queuesData
+                    .map((q) => {
+                        let icon = 'fa-utensils';
+                        if (q.type.includes('Restroom')) icon = 'fa-restroom';
+                        if (q.type.includes('Merch')) icon = 'fa-bag-shopping';
+
+                        return `
                         <div class="card" style="display: flex; align-items: center; gap: 16px; margin: 0;">
                             <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--bg-surface-elevated); display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
                                 <i class="fa-solid ${icon}" style="font-size: 1.2rem;"></i>
@@ -234,7 +275,8 @@ export const renderQueues = (queuesData) => {
                             </div>
                         </div>
                     `;
-                }).join('')}
+                    })
+                    .join('')}
             </div>
         </div>
     `;

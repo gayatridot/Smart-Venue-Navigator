@@ -1,26 +1,26 @@
 :root {
     /* Primary Colors (Trust + Energy) */
-    --color-primary: #1E3A8A; /* Deep Blue - trust, reliability */
-    --color-danger: #DC2626;  /* Vibrant Red - urgency, queues, alerts */
-    
+    --color-primary: #1e3a8a; /* Deep Blue - trust, reliability */
+    --color-danger: #dc2626; /* Vibrant Red - urgency, queues, alerts */
+
     /* Secondary Colors (Guidance + Calm) */
-    --color-success: #10B981; /* Emerald Green - free routes, short queues */
-    --color-warning: #FACC15; /* Golden Yellow - offers, stalls, highlights */
-    
+    --color-success: #10b981; /* Emerald Green - free routes, short queues */
+    --color-warning: #facc15; /* Golden Yellow - offers, stalls, highlights */
+
     /* Accent Colors (Modern Touch) */
-    --color-accent: #FCA5A5;  /* Peach-Pink - friendly UI elements, highlights */
-    --color-beige: #F5F5DC;   /* Beige - elegant complement */
-    
+    --color-accent: #fca5a5; /* Peach-Pink - friendly UI elements, highlights */
+    --color-beige: #f5f5dc; /* Beige - elegant complement */
+
     /* Background & Neutral Tones */
-    --bg-base: #FAF9F6;       /* Light Cream - clean, minimal bg */
-    --bg-surface: #E5E7EB;    /* Soft Gray - cards, panels, dividers */
+    --bg-base: #faf9f6; /* Light Cream - clean, minimal bg */
+    --bg-surface: #e5e7eb; /* Soft Gray - cards, panels, dividers */
     --bg-surface-elevated: #ffffff; /* White for cards inside gray panels */
-    
+
     /* Text Colors */
-    --text-primary: #1E3A8A;  /* Deep Blue for main text (replaces black for elegance) */
-    --text-secondary: #4B5563;/* Gray for secondary text */
-    --text-muted: #9CA3AF;
-    --text-inverse: #ffffff;  /* White text for dark buttons (blue/red) */
+    --text-primary: #1e3a8a; /* Deep Blue for main text (replaces black for elegance) */
+    --text-secondary: #4b5563; /* Gray for secondary text */
+    --text-muted: #9ca3af;
+    --text-inverse: #ffffff; /* White text for dark buttons (blue/red) */
 
     /* Typography */
     --font-family: 'Outfit', sans-serif;
@@ -30,7 +30,7 @@
     --font-size-lg: 1.125rem;
     --font-size-xl: 1.25rem;
     --font-size-2xl: 1.5rem;
-    
+
     /* Spacing */
     --space-1: 0.25rem;
     --space-2: 0.5rem;
@@ -39,14 +39,14 @@
     --space-5: 1.25rem;
     --space-6: 1.5rem;
     --space-8: 2rem;
-    
+
     /* Utilities */
     --border-radius-sm: 8px;
     --border-radius-md: 16px;
     --border-radius-lg: 24px;
     --border-radius-pill: 999px;
     --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    
+
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);

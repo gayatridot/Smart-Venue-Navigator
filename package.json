@@ -1,15 +1,33 @@
 {
-  "name": "smart-venue-navigator",
-  "version": "1.0.0",
-  "description": "Smart Venue Navigator MVP for Hackathon",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "dotenv": "^17.4.2",
-    "express": "^4.19.2",
-    "firebase": "^12.12.0",
-    "nodemailer": "^8.0.5"
-  }
+    "name": "smart-venue-navigator",
+    "version": "1.0.0",
+    "description": "Smart Venue Navigator MVP for Hackathon",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "test": "jest --coverage",
+        "build-js": "esbuild public/js/app.js public/js/admin-app.js --bundle --minify --format=esm --outdir=public/dist --external:https://*",
+        "build-css": "cleancss -o public/dist/style.min.css public/css/style.css",
+        "build": "mkdir public/dist 2>nul || (exit 0) && npm run build-js && npm run build-css"
+    },
+    "dependencies": {
+        "dotenv": "^17.4.2",
+        "express": "^4.19.2",
+        "firebase": "^12.12.0",
+        "nodemailer": "^8.0.5"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.29.0",
+        "@babel/preset-env": "^7.29.2",
+        "@eslint/js": "^10.0.1",
+        "clean-css-cli": "^5.6.3",
+        "esbuild": "^0.28.0",
+        "eslint": "^10.2.1",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.5",
+        "jest": "^30.3.0",
+        "jest-environment-jsdom": "^30.3.0",
+        "prettier": "^3.8.3",
+        "terser": "^5.46.1"
+    }
 }

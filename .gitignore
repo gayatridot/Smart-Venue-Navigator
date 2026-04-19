@@ -5,7 +5,9 @@ npm-debug.log
 .firebase/
 .firebaserc
 firebase.json
-dist/
+public/dist/
+coverage/
+.gemini/
 public/assets/*.png
 !public/assets/logo.png
 !public/assets/bg.png
