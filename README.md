@@ -63,16 +63,27 @@ A centralized hub for venue managers to:
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Process Flow: AI Risk Prediction
+This diagram illustrates how **Gemini AI** proactively protects the venue.
 
 ```mermaid
-graph TD
-    User((User App)) <--> Firebase[Firebase Firestore / Auth]
-    Admin((Admin Panel)) <--> Firebase
-    Server[Node.js Server] <--> Firebase
-    Server <--> GCloud[Google Cloud Maps/Vision]
-    Admin -- "Push Alerts" --> FCM[Firebase Cloud Messaging]
-    FCM -- "Notification" --> User
+sequenceDiagram
+    participant S as Venue Sensors
+    participant DB as Firestore
+    participant A as Admin Dashboard
+    participant G as Gemini AI (1.5 Flash)
+    participant U as Attendee App
+    
+    S->>DB: Update Zone Density
+    DB->>A: Stream Real-time Heatmap
+    A->>G: POST /api/ai-risk (Current Telemetry)
+    Note right of G: Predicts Risk 15min ahead
+    G-->>A: JSON (Risk: 9.2, Action: Divert)
+    
+    alt If Risk Score >= 9
+        A->>DB: Write Emergency Notification
+        DB->>U: Real-time Listener Triggers Alert
+    end
 ```
 
 ---
