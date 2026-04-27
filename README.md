@@ -86,6 +86,9 @@ sequenceDiagram
     end
 ```
 
+> [!TIP]
+> For a deeper dive into the **Structural System Architecture** and **Use-Case Diagrams**, see the [architecture_diagrams.md](file:///C:/Users/ok/.gemini/antigravity/brain/6c392b5d-eb52-4e7b-a3d7-26cd00fdea6d/architecture_diagrams.md) artifact.
+
 ---
 
 ## ⚙️ Setup & Installation
