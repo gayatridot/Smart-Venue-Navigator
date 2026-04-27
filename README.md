@@ -135,8 +135,17 @@ User location sharing is **strictly opt-in** and only active during live assista
 
 ---
 
-## 📄 License
+## 🔮 Future Roadmap
 
+VenueShield is built to scale. Our vision includes:
+- **AI Vision**: Automated CCTV density analysis using Google Cloud Vision.
+- **PWA**: Offline map support for signal-congested environments.
+- **AR Wayfinding**: Augmented Reality navigation to specific stadium seats.
+- **Dynamic Logistics**: Integration with city transit for post-event crowd dispersion.
+
+---
+
+## 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 Developed with ❤️ for the Hackathon.
