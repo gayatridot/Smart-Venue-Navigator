@@ -30,14 +30,14 @@ const setupAuthUI = () => {
     const updateAuthUI = () => {
         if (isSignupMode) {
             authTitle.innerText = 'Create Account';
-            authSubtitle.innerText = 'Join the Smart Venue Navigator today.';
+            authSubtitle.innerText = 'Join the VenueShield AI Crisis Response today.';
             signupFields.style.display = 'block';
             primaryBtn.innerHTML =
                 '<i class="fa-solid fa-user-plus" style="margin-right: 8px;"></i> Sign Up';
             toggleBtn.innerText = 'Already have an account? Sign In';
         } else {
             authTitle.innerText = 'Login required';
-            authSubtitle.innerText = 'Please login to access the Smart Venue Navigator.';
+            authSubtitle.innerText = 'Please login to access the VenueShield AI Crisis Response.';
             signupFields.style.display = 'none';
             primaryBtn.innerHTML =
                 '<i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i> Sign In';
@@ -204,7 +204,7 @@ const setupModals = () => {
 };
 
 const initApp = async () => {
-    console.log('🚀 Starting SVN UI Initialization...');
+    console.log('🚀 Starting VSAI UI Initialization...');
     // 1. Initialize Firebase (waits for server API keys)
     await initFirebase();
     console.log('✅ Firebase init sequence finished (isLive: ' + window.isLive + ')');

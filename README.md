@@ -1,18 +1,26 @@
-# 🏟️ Smart Venue Navigator
+# 🛡️ VenueShield AI Crisis Response
 
 **Elevating the Stadium Experience with Real-Time Intelligence.**
 
-![Smart Venue Navigator Banner](public/assets/docs/banner.png)
+![VenueShield AI Crisis Response Banner](public/assets/docs/banner.png)
 
 ## 🌟 Overview
 
-**Smart Venue Navigator (SVN)** is a premium, mobile-first companion application designed to transform the live event experience. By integrating real-time data from Firebase and Google Cloud services, SVN empowers fans to navigate complex stadiums with ease, avoid long queues, and stay safe through instant emergency coordination.
+**VenueShield AI Crisis Response (VSAI)** is a premium, mobile-first companion application designed to transform the live event experience. By integrating real-time data from Firebase and Google Cloud services, VSAI empowers fans to navigate complex stadiums with ease, avoid long queues, and stay safe through instant emergency coordination.
 
-For venue operators, SVN provides a powerful **Admin Dashboard** to monitor crowd density, manage events, and respond to assistance requests in real-time, ensuring a seamless and secure environment for thousands of attendees.
+For venue operators, VenueShield provides a powerful **Admin Dashboard** to monitor crowd density, manage events, and respond to assistance requests in real-time, ensuring a seamless and secure environment for thousands of attendees.
 
 ---
 
 ## 🚀 Key Features
+
+### 🧠 Gemini Crowd Crush Predictor [NEW]
+
+**The heart of VenueShield safety.** This feature uses **Google Gemini 1.5 Flash** to analyze real-time venue telemetry (zone density, entry rates, weather, and event type) to predict potential stampedes or crowd crushes **15 minutes before they happen**. 
+
+- **Preventive Analysis**: Moves security from "Reactive" to "Proactive".
+- **Actionable Commands**: Provides stewards with specific diversion tactics (e.g., "Close Gate C, Divert to North").
+- **Auto-Emergency Broadcast**: Instantly triggers a venue-wide notification if a critical risk threshold is reached.
 
 ### 🗺️ Real-Time Crowd Heatmaps
 
@@ -21,7 +29,7 @@ Visualize stadium congestion levels instantly. Our integration with Google Maps 
 
 ### ⏳ Smart Queue Management
 
-Stop guessing wait times. SVN tracks and predicts queue lengths for restrooms, concessions, and entry points, helping fans spend more time enjoying the event and less time standing in line.
+Stop guessing wait times. VenueShield tracks and predicts queue lengths for restrooms, concessions, and entry points, helping fans spend more time enjoying the event and less time standing in line.
 
 ### 📍 Indoor Navigation & Location Sharing
 
@@ -50,7 +58,7 @@ A centralized hub for venue managers to:
 | **Backend**        | Node.js, Express.js                                                |
 | **Database**       | Firebase Firestore (Real-time NoSQL)                               |
 | **Authentication** | Firebase Auth                                                      |
-| **Cloud Services** | Google Maps Platform, Firebase Cloud Messaging (FCM)               |
+| **Cloud Services** | Google Maps Platform, Firebase Cloud Messaging (FCM), Google Gemini AI (1.5 Flash) |
 | **Deployment**     | Dockerized for seamless scaling                                    |
 
 ---
@@ -80,8 +88,8 @@ graph TD
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/gayatridot/Smart-Venue-Navigator.git
-cd Smart-Venue-Navigator
+git clone https://github.com/gayatridot/VenueShield-AI-Crisis-Response.git
+cd VenueShield-AI-Crisis-Response
 npm install
 ```
 

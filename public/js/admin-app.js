@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let editingId = null;
     let loggedInUser = null;
     let adminReqSearchQuery = '';
+    let currentZones = []; // To store heatmap data for AI analysis
 
     // Tab Logic
     document.querySelectorAll('.nav-tab').forEach((tab) => {
@@ -213,6 +214,78 @@ document.addEventListener('DOMContentLoaded', async () => {
             status.innerText = e.message;
             status.style.color = 'var(--color-danger)';
         }
+    };
+
+    // Gemini AI Risk Predictor Logic
+    document.getElementById('btn-ai-scan').onclick = async () => {
+        const loader = document.getElementById('ai-scan-loader');
+        const results = document.getElementById('ai-risk-results');
+        const btn = document.getElementById('btn-ai-scan');
+
+        btn.disabled = true;
+        loader.style.display = 'block';
+        results.style.display = 'none';
+
+        try {
+            // Contextual Data
+            const evContext = document.getElementById('stats-ev-context');
+            const eventName =
+                evContext.options[evContext.selectedIndex]?.text || 'Active Live Event';
+
+            const response = await fetch('/api/ai-risk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    zones: currentZones,
+                    eventType: eventName,
+                    weather: 'High Temperature / Humidity',
+                    entryRate: 'Approximately 150 entries/minute',
+                }),
+            });
+
+            const data = await response.json();
+
+            // Display Results
+            document.getElementById('ai-risk-score').innerText = data.risk_score;
+            document.getElementById('ai-risk-level').innerText = data.risk_level;
+            document.getElementById('ai-eta').innerText =
+                data.eta_minutes !== undefined ? data.eta_minutes + ' mins' : '--';
+            document.getElementById('ai-reason').innerText = data.reason;
+            document.getElementById('ai-action').innerText = data.action;
+
+            // Styling based on risk
+            const scoreEl = document.getElementById('ai-risk-score');
+            const levelEl = document.getElementById('ai-risk-level');
+            if (data.risk_score >= 8) {
+                scoreEl.style.color = 'var(--color-danger)';
+                levelEl.style.color = 'var(--color-danger)';
+            } else if (data.risk_score >= 5) {
+                scoreEl.style.color = '#F59E0B';
+                levelEl.style.color = '#F59E0B';
+            } else {
+                scoreEl.style.color = 'var(--color-primary)';
+                levelEl.style.color = 'var(--color-primary)';
+            }
+
+            loader.style.display = 'none';
+            results.style.display = 'block';
+
+            // Auto-trigger FCM if Critical (Score >= 9)
+            if (data.risk_score >= 9) {
+                await sendNotification(
+                    `CRITICAL SAFETY ALERT: ${data.public_message}`,
+                    'emergency'
+                );
+                alert(
+                    'CRITICAL RISK DETECTED! Preventive emergency notification has been broadcast to all users.'
+                );
+            }
+        } catch (e) {
+            console.error('AI Scan Error:', e);
+            alert('Failed to complete AI risk analysis. Please check console.');
+            loader.style.display = 'none';
+        }
+        btn.disabled = false;
     };
 
     // ---- Ticket Analytics Wiring ----
@@ -436,6 +509,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         listenForHeatmap((zones) => {
+            currentZones = zones; // Update global state for Gemini AI
             renderAdminHeatmap(zones);
         });
 

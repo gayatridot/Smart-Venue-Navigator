@@ -1,7 +1,7 @@
 {
-    "name": "smart-venue-navigator",
+    "name": "venueshield-ai-crisis-response",
     "version": "1.0.0",
-    "description": "Smart Venue Navigator MVP for Hackathon",
+    "description": "VenueShield AI Crisis Response MVP for Hackathon",
     "main": "server.js",
     "scripts": {
         "start": "node server.js",
@@ -11,6 +11,7 @@
         "build": "node -e \"require('fs').mkdirSync('public/dist', { recursive: true })\" && npm run build-js && npm run build-css"
     },
     "dependencies": {
+        "@google/generative-ai": "^0.24.1",
         "dotenv": "^17.4.2",
         "express": "^4.19.2",
         "firebase": "^12.12.0",
