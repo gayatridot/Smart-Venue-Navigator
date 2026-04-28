@@ -322,21 +322,24 @@ function setupLocator() {
 
     if (btnRequest && modal && btnClose && btnSubmit) {
         btnRequest.addEventListener('click', () => {
+            if (!currentUser) {
+                document.getElementById('auth-overlay').classList.remove('hidden');
+                return;
+            }
             const select = document.getElementById('assistance-event-context');
             if (select) {
                 // Populate dropdown with ALL live/ongoing events so any attendee can reach the right admin
                 const ongoingEvents = liveEvents.filter((e) => {
-                    if (!e.date) return true; // no date set = always show
+                    if (!e.date) return false; // Strictly require a date for emergency requests
                     const today = new Date();
                     const eDate = new Date(e.date);
                     today.setHours(0, 0, 0, 0);
                     eDate.setHours(0, 0, 0, 0);
-                    return eDate >= today; // today or future = ongoing/upcoming
+                    return eDate.getTime() === today.getTime(); // ONLY TODAY
                 });
 
                 if (ongoingEvents.length > 0) {
                     select.innerHTML =
-                        '<option value="">No specific event (General Help)</option>' +
                         ongoingEvents
                             .map(
                                 (e) =>
@@ -344,7 +347,7 @@ function setupLocator() {
                             )
                             .join('');
                 } else {
-                    select.innerHTML = '<option value="">No specific event (General Help)</option>';
+                    select.innerHTML = '<option value="">(No Live Events Today)</option>';
                 }
             }
             modal.classList.remove('hidden');
@@ -358,8 +361,17 @@ function setupLocator() {
 
         btnSubmit.addEventListener('click', async () => {
             const message = textMsg.value.trim();
+            const select = document.getElementById('assistance-event-context');
+            const selectedEventId = select?.value;
+
             if (!message) {
                 statusText.innerText = 'Please enter a message.';
+                statusText.style.color = 'var(--color-danger)';
+                return;
+            }
+
+            if (!selectedEventId) {
+                statusText.innerText = 'Please select a live event to request assistance.';
                 statusText.style.color = 'var(--color-danger)';
                 return;
             }
@@ -418,16 +430,26 @@ function setupLocator() {
 
                 const data = await response.json();
                 if (response.ok) {
-                    statusText.innerText = 'Request sent successfully! Cooldown active.';
+                    statusText.innerText = 'Request sent successfully! Staff notified.';
                     statusText.style.color = 'var(--color-success)';
 
-                    // 60s cooldown for emergency help to prevent spam
+                    // Reset button state immediately to show completion
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> Sent!';
+                    btnSubmit.style.background = 'var(--color-success)';
+
+                    console.log('Emergency Request Successful, auto-closing in 2.5s...');
+                    // Auto-close after 2.5 seconds
                     setTimeout(() => {
-                        modal.classList.add('hidden');
+                        if (modal) {
+                            modal.classList.add('hidden');
+                            console.log('Modal hidden via timer');
+                        }
+                        // Fully reset for next time
                         btnSubmit.disabled = false;
+                        btnSubmit.style.background = ''; // reset to default CSS
                         btnSubmit.innerHTML =
                             '<i class="fa-solid fa-paper-plane" style="margin-right: 8px;"></i> Send Request';
-                    }, 60000);
+                    }, 2500);
                 } else {
                     throw new Error(data.error || 'Failed to send request');
                 }

@@ -18,12 +18,11 @@ const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 app.use(
     express.static(path.join(__dirname, 'public'), {
-        maxAge: '1d', // Cache static assets for 1 day
+        maxAge: 0, // Disable caching during development
         setHeaders: (res, path) => {
-            if (path.endsWith('.html')) {
-                // Don't cache HTML files to ensure updates propagate immediately
-                res.setHeader('Cache-Control', 'public, max-age=0');
-            }
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
         },
     })
 );

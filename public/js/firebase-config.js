@@ -88,7 +88,18 @@ export const deleteDbDoc = async (coll, id) => deleteDoc(doc(db, coll, id));
 
 // Async init because we must fetch keys from backend securely
 export const submitAssistanceRequest = async (requestData) => {
-    if (!isLive) return true;
+    if (!isLive) {
+        const mock = JSON.parse(localStorage.getItem('mockAssistance') || '[]');
+        const newReq = {
+            id: 'mock-' + Date.now(),
+            ...requestData,
+            userId: 'mock-user',
+            timestamp: { toDate: () => new Date() }, // Simulate Firestore timestamp
+        };
+        mock.unshift(newReq);
+        localStorage.setItem('mockAssistance', JSON.stringify(mock));
+        return true;
+    }
     try {
         await addDoc(collection(db, 'assistanceRequests'), {
             ...requestData,
@@ -104,16 +115,46 @@ export const submitAssistanceRequest = async (requestData) => {
 };
 
 export const listenForAssistanceRequests = (ownerId, callback) => {
-    if (!isLive) return;
-    const q = query(
-        collection(db, 'assistanceRequests'),
-        where('eventOwnerId', '==', ownerId),
-        orderBy('timestamp', 'desc')
-    );
-    return onSnapshot(q, (snapshot) => {
-        const requests = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        callback(requests);
-    });
+    if (isLive) {
+        const q = query(
+            collection(db, 'assistanceRequests'),
+            where('eventOwnerId', '==', ownerId)
+        );
+        return onSnapshot(q, (snapshot) => {
+            const requests = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            // Sort client-side to avoid needing a composite index
+            requests.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+            callback(requests);
+        });
+    } else {
+        // Mock fallback: Return a simulated list that updates when we 'submit'
+        const getMock = () => {
+            const data = JSON.parse(localStorage.getItem('mockAssistance') || '[]');
+            // Fix: Ensure old mock data has IDs for deletion to work
+            return data.map((r, i) => ({ ...r, id: r.id || `old-mock-${i}` }));
+        };
+        callback(getMock());
+        
+        // Poll local storage for changes in mock mode
+        const interval = setInterval(() => callback(getMock()), 2000);
+        return () => clearInterval(interval);
+    }
+};
+
+export const deleteAssistanceRequest = async (id) => {
+    if (!isLive) {
+        const mock = JSON.parse(localStorage.getItem('mockAssistance') || '[]');
+        const filtered = mock.filter((r) => r.id !== id);
+        localStorage.setItem('mockAssistance', JSON.stringify(filtered));
+        return true;
+    }
+    try {
+        await deleteDoc(doc(db, 'assistanceRequests', id));
+        return true;
+    } catch (e) {
+        console.error('Delete Assistance Error:', e);
+        throw e;
+    }
 };
 
 export const cleanupExpiredData = async (uid) => {
@@ -365,7 +406,7 @@ export const listenForEvents = (callback) => {
             {
                 id: 'e1',
                 name: 'Hackathon Finals',
-                date: '2026-04-15',
+                date: '2026-04-28',
                 location: 'Wembley Stadium',
                 desc: 'Join us for the final presentation!',
             },
@@ -395,7 +436,7 @@ export const listenForUserEvents = (uid, callback) => {
             {
                 id: 'e1',
                 name: 'Hackathon Finals',
-                date: '2026-04-15',
+                date: '2026-04-28',
                 location: 'Wembley Stadium',
                 desc: 'Join us for the final presentation!',
             },
@@ -965,11 +1006,12 @@ export const listenForTicketRequests = (ownerId, callback) => {
     if (isLive) {
         const q = query(
             collection(db, 'ticketRequests'),
-            where('eventOwnerId', '==', ownerId),
-            orderBy('timestamp', 'desc')
+            where('eventOwnerId', '==', ownerId)
         );
         return onSnapshot(q, (snapshot) => {
             const requests = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            // Sort client-side to avoid needing a composite index
+            requests.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
             callback(requests);
         });
     }

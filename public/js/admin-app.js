@@ -16,6 +16,7 @@ import {
     listenForTicketRequests,
     updateTicketRequestStatus,
     listenForAssistanceRequests,
+    deleteAssistanceRequest,
     deleteAllMyEvents,
     saveDevice,
     deleteDevice,
@@ -25,6 +26,27 @@ import {
     listenForEventTickets,
     addMoreTickets,
 } from './firebase-config.js';
+
+// GLOBAL DISMISSAL FUNCTION (Available immediately)
+window.dismissAssistanceRequest = async (reqId, btn) => {
+    console.log('FORCE DELETE TRIGGERED FOR:', reqId);
+    const card = btn.closest('.card');
+    if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.8)';
+        card.style.transition = 'all 0.2s ease';
+    }
+    try {
+        await deleteAssistanceRequest(reqId);
+        if (card) setTimeout(() => card.remove(), 200);
+    } catch (err) {
+        alert('Delete failed: ' + err.message);
+        if (card) {
+            card.style.opacity = '1';
+            card.style.transform = 'scale(1)';
+        }
+    }
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
     await initFirebase();
@@ -500,7 +522,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderTicketRequests(requests);
         });
 
+        console.log('Admin: Starting Assistance Request Listener for UID:', loggedInUser.uid);
         listenForAssistanceRequests(loggedInUser.uid, (requests) => {
+            console.log('Admin: Received Assistance Requests:', requests.length);
             renderAssistanceRequests(requests);
         });
 
@@ -593,7 +617,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         function renderAssistanceRequests(requests) {
             const list = document.getElementById('assistance-requests-list');
-            // Requests are already pre-filtered by Firestore listener
             const filtered = requests;
 
             list.innerHTML = filtered.length
@@ -611,17 +634,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p style="font-size: 0.85rem; color: var(--text-primary); background: var(--bg-surface-elevated); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
                     <i class="fa-solid fa-quote-left" style="opacity: 0.2; margin-right: 8px;"></i>${req.message}
                 </p>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.75rem;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.75rem; margin-bottom: 12px;">
                     <div><i class="fa-solid fa-calendar-day"></i> ${req.eventName}</div>
                     <div><i class="fa-solid fa-clock"></i> ${req.eventTime}</div>
                     ${req.location ? `<div style="grid-column: span 2; color: var(--color-primary); font-weight: 700;"><i class="fa-solid fa-location-crosshairs"></i> ${req.location.lat.toFixed(4)}, ${req.location.lng.toFixed(4)}</div>` : ''}
                 </div>
+                <button class="btn btn-alert btn-delete-assist" onclick="dismissAssistanceRequest('${req.id}', this)" style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10;" title="Delete Request">
+                    <i class="fa-solid fa-trash-can" style="pointer-events: none;"></i>
+                </button>
             </div>
         `
                       )
                       .join('')
-                : '<p class="subtext">No active calls for support.</p>';
+                : '<p class="subtext">Awaiting calls for support...</p>';
+
         }
+
 
         function renderUserLocations(locations) {
             const list = document.getElementById('admin-user-locations');
